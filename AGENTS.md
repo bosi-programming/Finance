@@ -1,0 +1,3 @@
+- **Stack:** React 19, TypeScript 5.9, Vite 7, TailwindCSS 4.
+- **Design System:** `bosi-design-system`.
+- **Testing:** Vitest, React Testing Library, Playwright.
