@@ -11,7 +11,11 @@
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "prepare": "simple-git-hooks"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
   },
   "keywords": [],
   "author": "",
@@ -51,9 +55,11 @@
     "eslint-plugin-storybook": "0.11.2",
     "globals": "16.4.0",
     "jsdom": "26.0.0",
+    "lint-staged": "^17.0.8",
     "playwright": "^1.58.2",
     "prettier": "3.4.2",
     "prettier-plugin-tailwindcss": "0.6.5",
+    "simple-git-hooks": "^2.13.1",
     "tailwind-merge": "3.0.1",
     "tailwindcss": "4.0.0",
     "typescript": "5.9.3",
