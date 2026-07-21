@@ -31,7 +31,7 @@ flowchart TD
 - First visit lands on `/salary`.
 - `/salary` shows two primary actions:
   - enter salary manually;
-  - import JSON from the existing CLI migration.
+  - import JSON from the existing CLI migration or from other time user was on site
 - Salary input is required and must be a non-negative number.
 - After saving salary, the user is redirected to `/budgets`.
 - `/salary` remains editable later.
