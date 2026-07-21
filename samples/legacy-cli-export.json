@@ -1,0 +1,13 @@
+{
+  "salary": 5000,
+  "fixed": {
+    "personal": 800,
+    "business": 400,
+    "subscriptions": 100,
+    "fixedInvestments": 300
+  },
+  "percentage": {
+    "investments": 20,
+    "leisure": 10
+  }
+}

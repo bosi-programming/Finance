@@ -1,0 +1,20 @@
+{
+  "version": "v0",
+  "salary": 5000,
+  "budgets": [
+    {
+      "id": "1",
+      "name": "Rent",
+      "type": "fixed",
+      "value": 6000,
+      "category": "Housing"
+    },
+    {
+      "id": "2",
+      "name": "Travel",
+      "type": "percentage",
+      "value": 50,
+      "category": "Hobbies"
+    }
+  ]
+}

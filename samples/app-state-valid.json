@@ -1,0 +1,27 @@
+{
+  "version": "v0",
+  "salary": 5000,
+  "budgets": [
+    {
+      "id": "1",
+      "name": "Rent",
+      "type": "fixed",
+      "value": 2000,
+      "category": "Housing"
+    },
+    {
+      "id": "2",
+      "name": "Travel",
+      "type": "percentage",
+      "value": 60,
+      "category": "Hobbies"
+    },
+    {
+      "id": "3",
+      "name": "Savings",
+      "type": "percentage",
+      "value": 30,
+      "category": "Savings"
+    }
+  ]
+}
