@@ -50,12 +50,13 @@ This document defines how a salary and a set of budgets become a per-budget allo
 - Percentage budgets: Travel 60% (Hobbies), Savings 30% (Savings)
 - `fixedTotal` = 2000
 - `remainder` = 5000 - 2000 = 3000
-- Travel allocation = 3000 * 0.60 = 1800
-- Savings allocation = 3000 * 0.30 = 900
+- Travel allocation = 3000 \* 0.60 = 1800
+- Savings allocation = 3000 \* 0.30 = 900
 - `percentageTotal` = 2700
 - `remaining` = 3000 - 2700 = 300
 
 Result:
+
 - Housing: Rent 2000 -> total 2000
 - Hobbies: Travel 1800 -> total 1800
 - Savings: Savings 900 -> total 900
@@ -68,9 +69,10 @@ Result:
 - Percentage budgets: Travel 50% (Hobbies)
 - `fixedTotal` = 6000 > 5000 -> warning.
 - `remainder` = -1000
-- Travel allocation = -1000 * 0.50 = -500
+- Travel allocation = -1000 \* 0.50 = -500
 
 Result:
+
 - warning shown
 - Housing: Rent 6000 -> total 6000
 - Hobbies: Travel -500 -> total -500

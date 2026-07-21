@@ -142,19 +142,19 @@ flowchart LR
 
 ## Redirect rules
 
-| From | Condition | Redirect to |
-|------|-----------|-------------|
-| `/budgets` | no salary | `/salary` |
-| `/result` | no salary | `/salary` |
-| `/result` | no budgets | `/budgets` |
-| `/salary` | salary saved, budgets present | CTA to `/result` |
-| `/salary` | salary saved, no budgets | CTA to `/budgets` |
+| From       | Condition                     | Redirect to       |
+| ---------- | ----------------------------- | ----------------- |
+| `/budgets` | no salary                     | `/salary`         |
+| `/result`  | no salary                     | `/salary`         |
+| `/result`  | no budgets                    | `/budgets`        |
+| `/salary`  | salary saved, budgets present | CTA to `/result`  |
+| `/salary`  | salary saved, no budgets      | CTA to `/budgets` |
 
 ## State-to-UI mapping
 
-| State | UI on `/budgets` | UI on `/result` |
-|-------|------------------|------------------|
-| Valid | list + totals | allocation breakdown |
-| Percentage sum > 100% | error banner | error banner |
-| Fixed sum > salary | warning banner | warning banner |
-| Remaining > 0 | remaining preview | remaining amount |
+| State                 | UI on `/budgets`  | UI on `/result`      |
+| --------------------- | ----------------- | -------------------- |
+| Valid                 | list + totals     | allocation breakdown |
+| Percentage sum > 100% | error banner      | error banner         |
+| Fixed sum > salary    | warning banner    | warning banner       |
+| Remaining > 0         | remaining preview | remaining amount     |
