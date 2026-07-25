@@ -8,3 +8,4 @@
 | `data-schema.md`         | JSON schemas, localStorage key, import/export format, CLI mapping |
 | `../samples/`            | Sample JSON files for app states and legacy CLI migration         |
 | `../src/types/budget.ts` | TypeScript source of truth for all data schemas                   |
+| `design-system.md`       | Tokens, components, and usage patterns for the UI                 |
