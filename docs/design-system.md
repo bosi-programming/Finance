@@ -88,6 +88,7 @@ All components come from `bosi-design-system`.
 - Actions: `error`, `warning`, `success`, `info`.
 - Colors: `default`, `primary`, `secondary`.
 - Sizes: `small`, `medium`, `full-width`.
+- Penpot: `Button` variant component with properties `Theme` (`onLight`, `onDark`), `action` (`none`, `error`, `warning`, `success`, `info`), `color` (`Default`, `primary`, `secondary`), `size` (`medium`, `small`, `fullWidth`). 24 variants total. `disabled` is a React prop, not yet a Penpot variant.
 - Usage:
   - Primary CTA: `Button color="primary" size="medium"`.
   - Destructive: `Button action="error"`.
