@@ -1,15 +1,10 @@
 export type BudgetType = 'fixed' | 'percentage';
 
 export interface Budget {
-  id: string;
   name: string;
   type: BudgetType;
   value: number;
   category: string;
-}
-
-export interface Salary {
-  amount: number;
 }
 
 export interface BudgetAllocationItem extends Budget {
