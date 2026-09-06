@@ -6,6 +6,11 @@ import {
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
+import { Budgets } from './pages/Budgets';
+import { Home } from './pages/Home';
+import { Result } from './pages/Result';
+import { Salary } from './pages/Salary';
+
 const rootRoute = createRootRoute({
   component: () => (
     <>
@@ -20,52 +25,28 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: function Index() {
-    return (
-      <div className="p-2">
-        <h3>Welcome Home!</h3>
-      </div>
-    );
-  },
+  component: Home,
 });
 
 const salaryRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/salary',
-  component: function Index() {
-    return (
-      <div className="p-2">
-        <h3>Welcome Salary!</h3>
-      </div>
-    );
-  },
+  component: Salary,
 });
 
 const budgetsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/budgets',
-  component: function Index() {
-    return (
-      <div className="p-2">
-        <h3>Welcome budgets!</h3>
-      </div>
-    );
-  },
+  component: Budgets,
 });
 
 const resultRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/result',
-  component: function Index() {
-    return (
-      <div className="p-2">
-        <h3>Welcome Result!</h3>
-      </div>
-    );
-  },
+  component: Result,
 });
 
-const routeTree = rootRoute.addChildren([
+export const routeTree = rootRoute.addChildren([
   indexRoute,
   salaryRoute,
   budgetsRoute,
