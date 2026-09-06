@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Outlet,
   createRouter,
@@ -6,14 +5,11 @@ import {
   createRootRoute,
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
-import {
-  Button,
-  Card,
-  Input,
-  Paper,
-  Selector,
-  Typography,
-} from 'bosi-design-system/react';
+
+import { Budgets } from './pages/Budgets';
+import { Home } from './pages/Home';
+import { Result } from './pages/Result';
+import { Salary } from './pages/Salary';
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -26,81 +22,28 @@ const rootRoute = createRootRoute({
   ),
 });
 
-const pageClasses = 'flex w-full max-w-md flex-col items-center gap-4 p-6';
-
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: function Home() {
-    return (
-      <Paper className={pageClasses}>
-        <Typography size="h1">Home</Typography>
-        <Button color="primary">Primary action</Button>
-      </Paper>
-    );
-  },
+  component: Home,
 });
 
 const salaryRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/salary',
-  component: function Salary() {
-    const [salary, setSalary] = useState('');
-
-    return (
-      <Paper className={pageClasses}>
-        <Typography size="h1">Salary</Typography>
-        <Input
-          name="salary"
-          label="Salary"
-          placeholder="Enter your salary"
-          type="number"
-          value={salary}
-          setValue={setSalary}
-        />
-      </Paper>
-    );
-  },
+  component: Salary,
 });
 
 const budgetsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/budgets',
-  component: function Budgets() {
-    const [budgetType, setBudgetType] = useState('');
-
-    return (
-      <Paper className={pageClasses}>
-        <Typography size="h1">Budgets</Typography>
-        <Selector
-          name="budget-type"
-          label="Budget type"
-          placeholder="Select a budget type"
-          value={budgetType}
-          onChange={(event) => {
-            setBudgetType(event.target.value);
-          }}
-          options={[
-            { id: 'fixed', label: 'Fixed' },
-            { id: 'percentage', label: 'Percentage' },
-          ]}
-        />
-      </Paper>
-    );
-  },
+  component: Budgets,
 });
 
 const resultRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/result',
-  component: function Result() {
-    return (
-      <Paper className={pageClasses}>
-        <Typography size="h1">Result</Typography>
-        <Card title="Result" content="Distribution preview" />
-      </Paper>
-    );
-  },
+  component: Result,
 });
 
 export const routeTree = rootRoute.addChildren([

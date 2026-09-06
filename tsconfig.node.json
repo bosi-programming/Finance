@@ -4,7 +4,7 @@
     "target": "ES2023",
     "lib": ["ES2023"],
     "module": "ESNext",
-    "types": ["node"],
+    "types": ["node", "vite/client"],
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -22,5 +22,11 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts", "vitest.config.ts", "vitest.shims.d.ts", "scripts/**/*.ts"]
+  "include": [
+    "vite.config.ts",
+    "vitest.config.ts",
+    "vitest.shims.d.ts",
+    "scripts/**/*.ts",
+    ".storybook/**/*.ts"
+  ]
 }
