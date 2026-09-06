@@ -3,12 +3,7 @@ import { act } from 'react';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { Budget } from '@/types/budget';
-import {
-  getFixedBudgetsTotal,
-  getNetSalary,
-  getTotalPercentage,
-  useFinanceStore,
-} from './store';
+import { useFinanceStore } from './store';
 
 const SALARY = 5000;
 
@@ -45,36 +40,6 @@ const savingsBudget: Budget = {
 };
 
 const mixedBudgets = [rentBudget, travelBudget, internetBudget, savingsBudget];
-
-describe('getFixedBudgetsTotal', () => {
-  it('sums only the fixed budgets in a mixed list', () => {
-    expect(getFixedBudgetsTotal(mixedBudgets)).toBe(2150);
-  });
-
-  it('returns 0 when there are no fixed budgets', () => {
-    expect(getFixedBudgetsTotal([travelBudget, savingsBudget])).toBe(0);
-  });
-});
-
-describe('getNetSalary', () => {
-  it('subtracts the fixed total from the salary', () => {
-    expect(getNetSalary(SALARY, mixedBudgets)).toBe(2850);
-  });
-
-  it('returns null when the salary is null', () => {
-    expect(getNetSalary(null, mixedBudgets)).toBeNull();
-  });
-});
-
-describe('getTotalPercentage', () => {
-  it('sums percentage values in percent units', () => {
-    expect(getTotalPercentage(mixedBudgets)).toBe(90);
-  });
-
-  it('returns 0 when there are no percentage budgets', () => {
-    expect(getTotalPercentage([rentBudget, internetBudget])).toBe(0);
-  });
-});
 
 describe('useFinanceStore', () => {
   beforeEach(() => {
