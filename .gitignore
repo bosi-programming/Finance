@@ -19,3 +19,5 @@ pnpm-debug.log*
 # temporary metric artifacts
 .tmp
 
+# recipe cards (local scratch state)
+recipes/

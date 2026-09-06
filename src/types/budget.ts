@@ -1,6 +1,7 @@
 export type BudgetType = 'fixed' | 'percentage';
 
 export interface Budget {
+  id: string;
   name: string;
   type: BudgetType;
   value: number;
