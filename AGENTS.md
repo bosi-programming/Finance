@@ -19,5 +19,5 @@
 
 ## v0 Architecture Decisions
 
-- **Routing:** React Router v7.
+- **Routing:** TanStack Router.
 - **State:** Zustand.
