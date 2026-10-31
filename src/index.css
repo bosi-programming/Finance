@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;800&display=swap');
 @import 'tailwindcss';
 @source "../node_modules/bosi-design-system/react-dist";
 
@@ -6,6 +7,8 @@ html {
 }
 
 @theme {
+  --font-sans: Roboto, ui-sans-serif, system-ui, sans-serif;
+
   --text-body: 1rem;
   --text-h1: 2.5rem;
   --text-h2: 2rem;
@@ -29,10 +32,12 @@ html {
   --color-secondary-on-dark: #e791bf;
   --color-success: #14662d;
   --color-error: #741427;
+  --color-error-on-dark: #ff6467;
   --color-warning: #c2530a;
   --color-info: #3a5683;
   --color-background-on-dark: #1e2d2f;
   --color-background-on-light: #fdf5e5;
   --color-nav-background-on-dark: #2e4649;
   --color-nav-background-on-light: #e8e1d3;
+  --color-overlay: rgb(0 0 0 / 0.5);
 }

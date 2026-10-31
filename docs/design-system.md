@@ -4,9 +4,9 @@ This doc maps the Penpot design system to the `bosi-design-system` React compone
 
 ## Penpot source
 
-- File: `Página Pessoal (copy)` (rename to `Bosi Design System` in the Penpot UI).
+- File: `Bosi Design System`.
 - URL: https://design.penpot.app/#/workspace?team-id=8b1c6e78-ea22-8156-8008-61d7f9f2ee2b&file-id=8b1c6e78-ea22-8156-8008-61e5fa7aa3d2&page-id=070f0ada-0f65-8077-8008-61d74971d29b
-- Components: `Button`, `Card`, `Paper`, `Typography`, `Input`, `Selector`.
+- Components: `Button`, `IconButton`, `Card`, `Paper`, `Typography`, `Input`, `Selector`, `Banner`, `Toast`, `Modal`, `Navigation`, `NavItem`, plus the `Trash`, `Pencil`, `ChevronDown` and `Close` icons.
 - Publish the file as a Penpot library (`File → Publish library`) to reuse the components in other projects.
 
 ## Tokens
@@ -29,11 +29,13 @@ This doc maps the Penpot design system to the `bosi-design-system` React compone
 | `success` | `#14662d` | positive actions |
 | `warning` | `#c2530a` | warning states |
 | `error` | `#741427` | errors / destructive actions |
+| `error-on-dark` | `#ff6467` | error text and borders on dark |
 | `info` | `#3a5683` | neutral actions |
 | `emerald` | `#0d9263` | focus rings / highlights |
 | `peach` | `#f7dba7` | soft accent |
 | `nav-background-on-light` | `#e8e1d3` | light nav background |
 | `nav-background-on-dark` | `#2e4649` | dark nav background |
+| `overlay` | `rgb(0 0 0 / 0.5)` | Modal backdrop |
 
 ### Typography
 
@@ -46,7 +48,7 @@ This doc maps the Penpot design system to the `bosi-design-system` React compone
 | `body` | 1rem | 400 | body text |
 | `details` | 0.875rem | 400 | captions, hints, errors |
 
-Font: Tailwind default sans stack.
+Font: Roboto (400, 700, 800), with `ui-sans-serif, system-ui, sans-serif` as fallback.
 
 ### Shadows
 
@@ -88,7 +90,7 @@ All components come from `bosi-design-system`.
 - Actions: `error`, `warning`, `success`, `info`.
 - Colors: `default`, `primary`, `secondary`.
 - Sizes: `small`, `medium`, `full-width`.
-- Penpot: `Button` variant component with properties `Theme` (`onLight`, `onDark`), `action` (`none`, `error`, `warning`, `success`, `info`), `color` (`Default`, `primary`, `secondary`), `size` (`medium`, `small`, `fullWidth`). 24 variants total. `disabled` is a React prop, not yet a Penpot variant.
+- Penpot: `Button` variant component with properties `Theme` (`Light`, `Dark`), `action` (`none`, `error`, `warning`, `success`, `info`), `color` (`Default`, `primary`, `secondary`), `size` (`medium`, `small`, `fullWidth`), `State` (`Default`, `Disabled`). 48 variants total.
 - Usage:
   - Primary CTA: `Button color="primary" size="medium"`.
   - Destructive: `Button action="error"`.
@@ -100,13 +102,15 @@ All components come from `bosi-design-system`.
 - Use for salary, budget names, and amounts.
 - Pass `type="number"` for numeric inputs.
 - Use the `error` prop for validation messages.
-- Penpot: `Input` variant component with property `State` (Default, Error).
+- Penpot: `Input` variant component with properties `State` (Default, Filled, Error, Disabled) and `Theme` (Light, Dark).
 
 ### Selector
 
-- Props: `name`, `value`, `onChange`, `options`, `label`, `placeholder`, `error`, `required`.
+- Props: `name`, `value`, `onChange`, `options`, `label`, `placeholder`, `error`, `required`, `disabled`, `onAddNew`, `addNewLabel`.
+- `onChange` receives `{ target: { name, value } }`.
+- Pass `onAddNew` to show a row such as `+ Add new category` at the end of the menu.
 - Use for fixed/percentage type selection or any short enum.
-- Penpot: `Selector` variant component with property `State` (Default, Error).
+- Penpot: `Selector` variant component with properties `State` (Default, Filled, Open, Error, Disabled) and `Theme` (Light, Dark).
 
 ### Card
 
@@ -120,6 +124,40 @@ All components come from `bosi-design-system`.
 - Use as a generic bordered/shadowed container.
 - Apply padding manually via `className` unless `isCard`.
 
+### IconButton
+
+- Props: `action` (`delete`, `edit`), `aria-label` (required), and button attributes.
+- Size: 44x44.
+- Penpot: `IconButton` variant component with properties `Action` and `Theme`.
+
+### Banner
+
+- Props: `type` (`error`, `warning`, `info`), `children`, `className`.
+- Use for page state, such as a percentage sum above 100.
+- Penpot: `Banner` variant component with properties `Type` and `Theme`.
+
+### Toast
+
+- `Toast` props: `message`, `onClose`, `closeLabel`. Only the error type exists for now.
+- Wrap Toasts in `ToastContainer`, which holds them at the top on mobile and top right on desktop.
+- Use for the failure of an action, such as a failed JSON import.
+- A Toast does not close by time. It closes with its button or a click outside, and that click also reaches the page.
+- Penpot: `Toast` variant component with properties `Type`, `Viewport` and `Theme`.
+
+### Modal
+
+- Props: `open`, `title`, `children`, `actions`, `onClose`.
+- Pass Cancel first in `actions`: `Button action="error"`, then `Button color="primary"` for Confirm. On mobile, Confirm moves above Cancel.
+- Esc and a click on the backdrop call `onClose`.
+- Penpot: `Modal` variant component with properties `Viewport` and `Theme`.
+
+### Navigation
+
+- `Navigation` props: `items`, `actions`, `className`, and `nav` attributes such as `aria-label`.
+- `NavItem` props: `active`, and anchor attributes. With a router, pass `href` and an `onClick` that navigates.
+- Actions: `Button color="primary" size="small"`.
+- Penpot: `Navigation` (`Viewport`, `Theme`) and `NavItem` (`State`, `Theme`) variant components.
+
 ## Dark mode
 
 - Toggle `dark` on the root element.
@@ -129,10 +167,11 @@ All components come from `bosi-design-system`.
 ## Validation patterns
 
 - Use `Input` and `Selector` `error` props for field-level errors.
-- Use `Typography color="error" size="details"` for inline alert text.
-- Percentage sum > 100: show error `Typography` above the list.
-- Fixed sum > salary: show warning `Typography`.
-- Remaining amount > 0: show info `Typography`.
+- Use `Banner` for errors in page state, and `Toast` for errors from an action.
+- Percentage sum > 100: show `Banner type="error"` above the list.
+- Fixed sum > salary: show `Banner type="warning"`.
+- Remaining amount > 0: show `Banner type="info"`.
+- Failed JSON import: show `Toast`.
 
 ## Responsive patterns
 
@@ -147,7 +186,8 @@ All components come from `bosi-design-system`.
 Requirements for how the app consumes the design system (ENG-4).
 
 - All app UI renders `bosi-design-system` components only: Typography, Paper,
-  Button, Input, Selector, Card. No bespoke text styling or component markup.
+  Button, IconButton, Input, Selector, Card, Banner, Toast, Modal, Navigation,
+  NavItem. No bespoke text styling or component markup.
 - Import components from the package's React entry. The package's CSS entry
   is not published and must never be imported.
 - Styles are generated by the app's Tailwind build, which scans the package
