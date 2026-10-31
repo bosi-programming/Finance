@@ -71,7 +71,7 @@ flowchart TD
   - dropdown of existing categories;
   - "Add new category" option with a required category name.
 - Edit and delete actions are available per budget.
-- Empty categories remain visible if all budgets inside them were deleted.
+- A category exists only while it holds a budget. With no budgets left, `/budgets` shows its empty state.
 - Validation feedback appears live on `/budgets`:
   - error if percentage sum > 100%;
   - warning if fixed sum > salary.
@@ -129,7 +129,9 @@ flowchart LR
 - Nav items: Salary, Budgets, Result.
 - Active route is highlighted.
 - Import and Export JSON actions are available in the top-level nav.
-- Import/export is also offered as a CTA on `/salary` for first-visit users.
+- Nav items stay enabled on every route. On a blocked route a click follows the redirect rules: with no salary, Budgets and Result stay on `/salary`; with no budgets, Result stays on `/budgets`.
+- Export is disabled until a salary exists, since there is nothing to export before it. Import stays enabled on every route.
+- Import is also offered as a CTA on `/salary` for first-visit users. Export is in the top-level nav only.
 
 ## Import, export, and CLI migration
 
@@ -156,6 +158,6 @@ flowchart LR
 | State                 | UI on `/budgets`  | UI on `/result`      |
 | --------------------- | ----------------- | -------------------- |
 | Valid                 | list + totals     | allocation breakdown |
-| Percentage sum > 100% | error banner      | error banner         |
+| Percentage sum > 100% | error Toast       | error Toast          |
 | Fixed sum > salary    | warning banner    | warning banner       |
 | Remaining > 0         | remaining preview | remaining amount     |
