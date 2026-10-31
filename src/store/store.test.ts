@@ -1,9 +1,13 @@
 import { renderHook } from '@testing-library/react';
 import { act } from 'react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { Budget } from '@/types/budget';
+import { db } from '@/persistence/db';
+import { resetPersistence } from '@/test/resetPersistence';
+import type { Budget, StoredRow } from '@/types/budget';
 import {
+  IMPORT_FAILED_MESSAGE,
+  STORAGE_FAILED_MESSAGE,
   getFixedBudgetsTotal,
   getNetSalary,
   getTotalPercentage,
@@ -77,9 +81,7 @@ describe('getTotalPercentage', () => {
 });
 
 describe('useFinanceStore', () => {
-  beforeEach(() => {
-    useFinanceStore.setState({ salary: null, budgets: [] });
-  });
+  beforeEach(resetPersistence);
 
   it('starts with an unset salary and no budgets', () => {
     const { result } = renderHook(() => useFinanceStore());
@@ -185,5 +187,198 @@ describe('useFinanceStore', () => {
     const { result } = renderHook(() => useFinanceStore());
     expect(result.current.salary).toBeNull();
     expect(result.current.budgets).toEqual([]);
+  });
+});
+
+function storedRow() {
+  return db.appState.get('current');
+}
+
+describe('store persistence', () => {
+  beforeEach(resetPersistence);
+
+  it('starts with no toast', () => {
+    expect(useFinanceStore.getState().toast).toBeNull();
+  });
+
+  it('saves the salary', async () => {
+    useFinanceStore.getState().setSalary(SALARY);
+
+    await vi.waitFor(async () => {
+      expect((await storedRow())?.salary).toBe(SALARY);
+    });
+  });
+
+  it('saves added budgets in order', async () => {
+    useFinanceStore.getState().addBudget(rentBudget);
+    useFinanceStore.getState().addBudget(travelBudget);
+
+    await vi.waitFor(async () => {
+      expect((await storedRow())?.budgets).toEqual([rentBudget, travelBudget]);
+    });
+  });
+
+  it('saves an updated budget', async () => {
+    useFinanceStore.getState().addBudget(rentBudget);
+    useFinanceStore.getState().addBudget(travelBudget);
+    useFinanceStore.getState().updateBudget({ ...rentBudget, name: 'Flat' });
+
+    await vi.waitFor(async () => {
+      expect((await storedRow())?.budgets).toEqual([
+        { ...rentBudget, name: 'Flat' },
+        travelBudget,
+      ]);
+    });
+  });
+
+  it('saves a deletion', async () => {
+    useFinanceStore.getState().addBudget(rentBudget);
+    useFinanceStore.getState().addBudget(travelBudget);
+    useFinanceStore.getState().deleteBudget(rentBudget.id);
+
+    await vi.waitFor(async () => {
+      expect((await storedRow())?.budgets).toEqual([travelBudget]);
+    });
+  });
+
+  it('stores a null salary', async () => {
+    useFinanceStore.getState().addBudget(rentBudget);
+
+    await vi.waitFor(async () => {
+      expect(await storedRow()).toEqual({
+        version: 'v0',
+        salary: null,
+        budgets: [rentBudget],
+      });
+    });
+  });
+
+  it('keeps memory and shows the toast when a write fails', async () => {
+    vi.spyOn(db.appState, 'put').mockRejectedValue(new Error('write failed'));
+
+    useFinanceStore.getState().setSalary(SALARY);
+
+    await vi.waitFor(() => {
+      expect(useFinanceStore.getState().toast).toBe(STORAGE_FAILED_MESSAGE);
+    });
+    expect(useFinanceStore.getState().salary).toBe(SALARY);
+  });
+
+  it('runs in memory with no storage', () => {
+    db.close();
+
+    useFinanceStore.getState().setSalary(SALARY);
+    useFinanceStore.getState().addBudget(rentBudget);
+
+    expect(useFinanceStore.getState().salary).toBe(SALARY);
+    expect(useFinanceStore.getState().budgets).toEqual([rentBudget]);
+  });
+
+  it('clears the toast', () => {
+    useFinanceStore.setState({ toast: 'x' });
+
+    useFinanceStore.getState().clearToast();
+
+    expect(useFinanceStore.getState().toast).toBeNull();
+  });
+});
+
+describe('hydrate', () => {
+  beforeEach(resetPersistence);
+
+  it('sets salary and budgets from a valid row', () => {
+    const row: StoredRow = { version: 'v0', salary: 9, budgets: [rentBudget] };
+
+    useFinanceStore.getState().hydrate(row);
+
+    expect(useFinanceStore.getState().salary).toBe(9);
+    expect(useFinanceStore.getState().budgets).toEqual([rentBudget]);
+  });
+
+  it('reads undefined as empty', () => {
+    useFinanceStore.setState({ salary: 5, budgets: [rentBudget] });
+
+    useFinanceStore.getState().hydrate(undefined);
+
+    expect(useFinanceStore.getState().salary).toBeNull();
+    expect(useFinanceStore.getState().budgets).toEqual([]);
+  });
+
+  it('reads a bad row as empty', () => {
+    useFinanceStore.setState({ salary: 5, budgets: [rentBudget] });
+
+    useFinanceStore.getState().hydrate({ version: 'v0', salary: 'x' });
+
+    expect(useFinanceStore.getState().salary).toBeNull();
+    expect(useFinanceStore.getState().budgets).toEqual([]);
+  });
+
+  it('does not write or touch the toast', () => {
+    const put = vi.spyOn(db.appState, 'put');
+
+    useFinanceStore
+      .getState()
+      .hydrate({ version: 'v0', salary: 1, budgets: [] });
+
+    expect(put).not.toHaveBeenCalled();
+    expect(useFinanceStore.getState().toast).toBeNull();
+  });
+
+  it('leaves a bad row in place', async () => {
+    const bad = { version: 'v9' } as unknown as StoredRow;
+    await db.appState.put(bad, 'current');
+
+    useFinanceStore.getState().hydrate(bad);
+
+    expect(await storedRow()).toEqual(bad);
+  });
+
+  it('replaces a bad row on the next write', async () => {
+    const bad = { version: 'v9' } as unknown as StoredRow;
+    await db.appState.put(bad, 'current');
+    useFinanceStore.getState().hydrate(bad);
+
+    useFinanceStore.getState().setSalary(SALARY);
+
+    await vi.waitFor(async () => {
+      expect(await storedRow()).toEqual({
+        version: 'v0',
+        salary: SALARY,
+        budgets: [],
+      });
+    });
+  });
+});
+
+describe('replaceAll', () => {
+  beforeEach(resetPersistence);
+
+  const incoming = {
+    version: 'v0' as const,
+    salary: 8,
+    budgets: [travelBudget],
+  };
+
+  it('replaces memory and the row', async () => {
+    useFinanceStore.setState({ salary: 1, budgets: [rentBudget] });
+
+    const ok = await useFinanceStore.getState().replaceAll(incoming);
+
+    expect(ok).toBe(true);
+    expect(useFinanceStore.getState().salary).toBe(8);
+    expect(useFinanceStore.getState().budgets).toEqual([travelBudget]);
+    expect(await storedRow()).toEqual(incoming);
+  });
+
+  it('keeps memory and shows the failure toast when the write fails', async () => {
+    useFinanceStore.setState({ salary: 1, budgets: [rentBudget] });
+    vi.spyOn(db.appState, 'put').mockRejectedValue(new Error('write failed'));
+
+    const ok = await useFinanceStore.getState().replaceAll(incoming);
+
+    expect(ok).toBe(false);
+    expect(useFinanceStore.getState().salary).toBe(1);
+    expect(useFinanceStore.getState().budgets).toEqual([rentBudget]);
+    expect(useFinanceStore.getState().toast).toBe(IMPORT_FAILED_MESSAGE);
   });
 });
