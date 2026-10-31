@@ -116,12 +116,12 @@ All components come from `bosi-design-system`.
 
 - Props: `title`, `content`, `actions`, `className`.
 - Fixed size on desktop: `270px` width.
-- Use for summary tiles and the result breakdown.
+- Use for summary tiles.
 
 ### Paper
 
 - Props: `children`, `isCard`, `className`.
-- Use as a generic bordered/shadowed container.
+- Use as a generic bordered/shadowed container, including the rows of the result breakdown.
 - Apply padding manually via `className` unless `isCard`.
 
 ### IconButton
@@ -133,14 +133,14 @@ All components come from `bosi-design-system`.
 ### Banner
 
 - Props: `type` (`error`, `warning`, `info`), `children`, `className`.
-- Use for page state, such as a percentage sum above 100.
+- Use for warnings in page state, such as fixed budgets above the salary.
 - Penpot: `Banner` variant component with properties `Type` and `Theme`.
 
 ### Toast
 
 - `Toast` props: `message`, `onClose`, `closeLabel`. Only the error type exists for now.
 - Wrap Toasts in `ToastContainer`, which holds them at the top on mobile and top right on desktop.
-- Use for the failure of an action, such as a failed JSON import.
+- Use for errors, in page state or from an action, such as a percentage sum above 100 or a failed JSON import.
 - A Toast does not close by time. It closes with its button or a click outside, and that click also reaches the page.
 - Penpot: `Toast` variant component with properties `Type`, `Viewport` and `Theme`.
 
@@ -167,10 +167,10 @@ All components come from `bosi-design-system`.
 ## Validation patterns
 
 - Use `Input` and `Selector` `error` props for field-level errors.
-- Use `Banner` for errors in page state, and `Toast` for errors from an action.
-- Percentage sum > 100: show `Banner type="error"` above the list.
+- Use `Toast` for errors, in page state or from an action, and `Banner` for warnings in page state.
+- Percentage sum > 100: show `Toast`. It shows again when the page opens or the budgets change while the sum stays above 100.
 - Fixed sum > salary: show `Banner type="warning"`.
-- Remaining amount > 0: show `Banner type="info"`.
+- Remaining amount: show a row in the breakdown, with no `Banner`.
 - Failed JSON import: show `Toast`.
 
 ## Responsive patterns

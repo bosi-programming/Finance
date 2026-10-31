@@ -76,7 +76,7 @@ flowchart TD
   - error if percentage sum > 100%;
   - warning if fixed sum > salary.
 - The same validation is enforced when the user clicks the "See result" CTA.
-- If the plan is invalid, the user cannot navigate to `/result` until the error is fixed.
+- If the plan is invalid, the "See result" CTA stays on `/budgets` until the error is fixed. Top-level nav and import can still open `/result`, which shows the error state.
 
 ## Result preview flow
 
@@ -94,7 +94,7 @@ flowchart TD
     CategoryTotals --> Remaining[Show remaining]
     RenderResult --> ErrorState{percentage sum > 100%}
     RenderResult --> WarningState{fixed sum > salary}
-    ErrorState -->|yes| ShowResultError[Show error banner]
+    ErrorState -->|yes| ShowResultError[Show error Toast, hide allocation]
     WarningState -->|yes| ShowResultWarning[Show warning banner]
     ShowResultError --> EditBudgets[Edit budgets]
     ShowResultWarning --> EditBudgets
@@ -110,8 +110,9 @@ flowchart TD
   - budgets grouped by category;
   - per-category totals;
   - remaining amount;
-  - error banner if percentage sum > 100%;
+  - error Toast if percentage sum > 100%;
   - warning banner if fixed sum > salary.
+- With an error, the screen shows only the salary, the Toast, any warning banner and the CTA.
 - A CTA returns to `/budgets` to edit the plan.
 
 ## Navigation flow
