@@ -32,6 +32,12 @@ export interface AppState {
   budgets: Budget[];
 }
 
+export interface StoredRow {
+  version: 'v0';
+  salary: number | null;
+  budgets: Budget[];
+}
+
 export interface LegacyCliExport {
   salary?: number;
   fixed?: {
@@ -45,3 +51,5 @@ export interface LegacyCliExport {
     leisure?: number;
   };
 }
+
+export type LegacyCliFile = LegacyCliExport & { salary: number };

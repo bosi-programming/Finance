@@ -1,26 +1,15 @@
 import {
-  Outlet,
   createRouter,
   createRoute,
   createRootRoute,
 } from '@tanstack/react-router';
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
-
+import { RootLayout } from '@/components/RootLayout';
 import { Budgets } from './pages/Budgets';
 import { Home } from './pages/Home';
 import { Result } from './pages/Result';
 import { Salary } from './pages/Salary';
 
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <main className="dark:bg-background-on-dark bg-background-on-light flex min-h-screen w-screen flex-col items-center px-5 pt-5 md:pt-20 lg:justify-center lg:p-0">
-        <Outlet />
-      </main>
-      <TanStackRouterDevtools />
-    </>
-  ),
-});
+const rootRoute = createRootRoute({ component: RootLayout });
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,

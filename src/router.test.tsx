@@ -4,6 +4,7 @@ import {
   createRouter,
 } from '@tanstack/react-router';
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
 import { routeTree } from './router';
@@ -51,11 +52,13 @@ describe('router', () => {
       screen.getByRole('heading', { level: 1, name: 'Budgets' }),
     ).toBeInTheDocument();
     const selector = screen.getByRole('combobox', { name: 'Budget type' });
+    await userEvent.click(selector);
+    const listbox = screen.getByRole('listbox');
     expect(
-      within(selector).getByRole('option', { name: 'Fixed' }),
+      within(listbox).getByRole('option', { name: 'Fixed' }),
     ).toBeInTheDocument();
     expect(
-      within(selector).getByRole('option', { name: 'Percentage' }),
+      within(listbox).getByRole('option', { name: 'Percentage' }),
     ).toBeInTheDocument();
   });
 
