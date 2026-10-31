@@ -129,7 +129,7 @@ flowchart LR
 - Nav items: Salary, Budgets, Result.
 - Active route is highlighted.
 - Import and Export JSON actions are available in the top-level nav.
-- Nav items stay enabled on every route. On a blocked route a click follows the redirect rules: with no salary, Budgets and Result stay on `/salary`; with no budgets, Result stays on `/budgets`.
+- Nav items stay enabled on every route. On a blocked route a click follows the [redirect rules](#redirect-rules).
 - Export is disabled until a salary exists, since there is nothing to export before it. Import stays enabled on every route.
 - Import is also offered as a CTA on `/salary` for first-visit users. Export is in the top-level nav only.
 
