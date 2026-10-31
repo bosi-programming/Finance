@@ -79,11 +79,12 @@ export interface AllocationResult {
 - `error`: non-null when percentage budgets sum to more than 100%.
 - `warning`: non-null when fixed budgets exceed salary.
 
-## localStorage
+## IndexedDB
 
-- Key: `finance-fe-v0`
-- Value: serialized `AppState` JSON.
-- Example: `localStorage.setItem("finance-fe-v0", JSON.stringify(state))`.
+- Database `finance-fe`, version 1, table `appState`, key `current`.
+- Value: one row `{ version: "v0", salary: number | null, budgets: Budget[] }`. `salary` is `null` until the user sets one; the import and export file always has a number.
+- No row means empty state. A row that fails validation also reads as empty and stays until the next write replaces it.
+- Every store action writes the whole row. Two tabs: the last write wins.
 
 ## JSON import/export format
 
@@ -94,14 +95,32 @@ The exported file is exactly the `AppState` object:
   "version": "v0",
   "salary": 5000,
   "budgets": [
-    { "id": "1", "name": "Rent", "type": "fixed", "value": 2000, "category": "Housing" },
-    { "id": "2", "name": "Travel", "type": "percentage", "value": 60, "category": "Hobbies" },
-    { "id": "3", "name": "Savings", "type": "percentage", "value": 30, "category": "Savings" }
+    {
+      "id": "1",
+      "name": "Rent",
+      "type": "fixed",
+      "value": 2000,
+      "category": "Housing"
+    },
+    {
+      "id": "2",
+      "name": "Travel",
+      "type": "percentage",
+      "value": 60,
+      "category": "Hobbies"
+    },
+    {
+      "id": "3",
+      "name": "Savings",
+      "type": "percentage",
+      "value": 30,
+      "category": "Savings"
+    }
   ]
 }
 ```
 
-Importing JSON replaces the current `AppState` in memory and `localStorage`.
+Importing JSON replaces the current `AppState` in memory and in IndexedDB. The file is written to IndexedDB first; if that fails, nothing changes and the app shows "Import failed. Your data was not changed." The export file is named `finance-fe-v0.json`.
 
 ## CLI migration
 

@@ -10,7 +10,7 @@
 - If percentage budgets sum to >100 -> show error.
 - If fixed budgets exceed salary -> show warning.
 - Any unallocated amount after percentage distribution -> show as **Remaining**.
-- Persistence: `localStorage` + JSON import/export.
+- Persistence: IndexedDB (Dexie) + JSON import/export.
 - v0 design starts from scratch; multiple routes.
 
 ## Git
