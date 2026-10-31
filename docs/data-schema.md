@@ -136,12 +136,10 @@ export interface LegacyCliExport {
 
 Each group value becomes one budget with a default category. The user can re-categorize during import or later.
 
-## Remaining vs Deficit
+## Remaining
 
 - `remaining` is always part of `AllocationResult`.
-- When `remaining > 0`, the UI shows the value as `Remaining`.
-- When `remaining < 0`, the UI shows the value as `Deficit`.
-- When `remaining === 0`, the row is hidden unless the design explicitly requires it.
+- The UI shows the value as `Remaining` in every state that shows the breakdown, including `$0` and negative values such as `-$500`.
 
 ## Sample files
 

@@ -26,20 +26,20 @@ This document defines how a salary and a set of budgets become a per-budget allo
   - each fixed budget with its original amount;
   - each percentage budget with its computed allocation;
   - a per-category total: sum of fixed amounts + percentage allocations inside that category;
-  - a `remaining` line when `remaining > 0`.
+  - a `remaining` line, whether positive, 0 or negative.
 - `remaining` is not assigned to any category; it is a separate line.
 
 ## Validation rules
 
 - **Error**: `sum(percentage percentages) > 100%`.
   - The plan is invalid. Percentage allocations cannot be computed as requested.
-  - UI must show an error message and block the allocation preview.
+  - UI must show an error Toast and block the allocation preview.
 - **Warning**: `fixedTotal > salary`.
   - Fixed budgets already exceed the salary; the remainder is negative.
   - UI must show a warning. Percentage allocations are computed as negative values, but the primary feedback is that fixed budgets are too high.
-- **Remaining**: `remaining > 0` when `sum(percentage percentages) < 100%`.
-  - This is a valid state, not an error.
-  - UI must display `remaining` as an explicit line.
+- **Remaining**: `remaining > 0` when `sum(percentage percentages) < 100%`, and 0 when the sum is 100%.
+  - These are valid states, not errors.
+  - UI must display `remaining` as an explicit line in every state that shows the breakdown, as `$0` or `-$500` when it is 0 or negative.
 
 ## Numeric examples
 
@@ -94,8 +94,8 @@ Result:
 - Allocation screen must show three possible states:
   - normal breakdown with category totals and a `Remaining` row;
   - warning banner when fixed budgets exceed salary;
-  - error banner when percentage budgets exceed 100%.
-- `Remaining` is always visible when it is positive, even if the user is not in an error or warning state.
+  - error Toast when percentage budgets exceed 100%, with no breakdown.
+- `Remaining` is visible in every state that shows the breakdown, whatever its value.
 
 ## Impact on engineering
 
