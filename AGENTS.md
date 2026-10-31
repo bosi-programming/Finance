@@ -13,6 +13,10 @@
 - Persistence: `localStorage` + JSON import/export.
 - v0 design starts from scratch; multiple routes.
 
+## Git
+
+- Personal project: commit directly to `main`. Do not create branches or open PRs.
+
 ## v0 Architecture Decisions
 
 - **Routing:** React Router v7.
