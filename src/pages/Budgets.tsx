@@ -13,7 +13,8 @@ import {
   percentageOverMessage,
   percentageTotal,
 } from '@/domain/budgets/planChecks';
-import { getFixedBudgetsTotal, useFinanceStore } from '@/store';
+import { getFixedBudgetsTotal } from '@/domain/budgets/totals';
+import { useFinanceStore } from '@/store';
 import { type Budget } from '@/types/budget';
 
 type BudgetDialog =
