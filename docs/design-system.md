@@ -13,48 +13,48 @@ This doc maps the Penpot design system to the `bosi-design-system` React compone
 
 ### Colors
 
-| Token | Hex | Usage |
-| --- | --- | --- |
-| `background-on-light` | `#fdf5e5` | light page background |
-| `background-on-dark` | `#1e2d2f` | dark page background |
-| `primary-on-light` | `#246347` | primary headings/CTA on light |
-| `primary-on-dark` | `#81d8d0` | primary headings/CTA on dark |
-| `secondary-on-light` | `#df6da9` | secondary accent on light |
-| `secondary-on-dark` | `#e791bf` | secondary accent on dark |
-| `black` | `#2f3032` | body text on light |
-| `white` | `#ffffff` | body text on dark |
-| `gray-15` | `#212529` | strong dark backgrounds |
-| `gray-68` | `#aeaeae` | muted text/borders |
-| `gray-93` | `#eeeeee` | light backgrounds |
-| `success` | `#14662d` | positive actions |
-| `warning` | `#c2530a` | warning states |
-| `error` | `#741427` | errors / destructive actions |
-| `error-on-dark` | `#ff6467` | error text and borders on dark |
-| `info` | `#3a5683` | neutral actions |
-| `emerald` | `#0d9263` | focus rings / highlights |
-| `peach` | `#f7dba7` | soft accent |
-| `nav-background-on-light` | `#e8e1d3` | light nav background |
-| `nav-background-on-dark` | `#2e4649` | dark nav background |
-| `overlay` | `rgb(0 0 0 / 0.5)` | Modal backdrop |
+| Token                     | Hex                | Usage                          |
+| ------------------------- | ------------------ | ------------------------------ |
+| `background-on-light`     | `#fdf5e5`          | light page background          |
+| `background-on-dark`      | `#1e2d2f`          | dark page background           |
+| `primary-on-light`        | `#246347`          | primary headings/CTA on light  |
+| `primary-on-dark`         | `#81d8d0`          | primary headings/CTA on dark   |
+| `secondary-on-light`      | `#df6da9`          | secondary accent on light      |
+| `secondary-on-dark`       | `#e791bf`          | secondary accent on dark       |
+| `black`                   | `#2f3032`          | body text on light             |
+| `white`                   | `#ffffff`          | body text on dark              |
+| `gray-15`                 | `#212529`          | strong dark backgrounds        |
+| `gray-68`                 | `#aeaeae`          | muted text/borders             |
+| `gray-93`                 | `#eeeeee`          | light backgrounds              |
+| `success`                 | `#14662d`          | positive actions               |
+| `warning`                 | `#c2530a`          | warning states                 |
+| `error`                   | `#741427`          | errors / destructive actions   |
+| `error-on-dark`           | `#ff6467`          | error text and borders on dark |
+| `info`                    | `#3a5683`          | neutral actions                |
+| `emerald`                 | `#0d9263`          | focus rings / highlights       |
+| `peach`                   | `#f7dba7`          | soft accent                    |
+| `nav-background-on-light` | `#e8e1d3`          | light nav background           |
+| `nav-background-on-dark`  | `#2e4649`          | dark nav background            |
+| `overlay`                 | `rgb(0 0 0 / 0.5)` | Modal backdrop                 |
 
 ### Typography
 
-| Token | Size | Weight | Usage |
-| --- | --- | --- | --- |
-| `h1` | 2.5rem | 700 | page title |
-| `h2` | 2rem | 800 | section title |
-| `h3` | 1.5rem | 700 | card title |
-| `h4` | 1.25rem | 700 | sub-section |
-| `body` | 1rem | 400 | body text |
-| `details` | 0.875rem | 400 | captions, hints, errors |
+| Token     | Size     | Weight | Usage                   |
+| --------- | -------- | ------ | ----------------------- |
+| `h1`      | 2.5rem   | 700    | page title              |
+| `h2`      | 2rem     | 800    | section title           |
+| `h3`      | 1.5rem   | 700    | card title              |
+| `h4`      | 1.25rem  | 700    | sub-section             |
+| `body`    | 1rem     | 400    | body text               |
+| `details` | 0.875rem | 400    | captions, hints, errors |
 
 Font: Roboto (400, 700, 800), with `ui-sans-serif, system-ui, sans-serif` as fallback.
 
 ### Shadows
 
-| Token | Value |
-| --- | --- |
-| `shadow-paper` | `4px 4px 4px 0 rgb(0 0 0 / 0.25)` |
+| Token               | Value                                   |
+| ------------------- | --------------------------------------- |
+| `shadow-paper`      | `4px 4px 4px 0 rgb(0 0 0 / 0.25)`       |
 | `shadow-paper-dark` | `4px 4px 4px 0 rgb(255 255 255 / 0.25)` |
 
 ### Spacing

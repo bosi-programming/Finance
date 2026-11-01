@@ -11,7 +11,9 @@ import eslintConfigPrettier from 'eslint-plugin-prettier/recommended';
 import { defineConfig } from 'eslint/config';
 
 const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
-const prettierignorePath = fileURLToPath(new URL('./.prettierignore', import.meta.url));
+const prettierignorePath = fileURLToPath(
+  new URL('./.prettierignore', import.meta.url),
+);
 
 export default defineConfig(
   includeIgnoreFile(gitignorePath),
