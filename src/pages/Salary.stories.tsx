@@ -7,6 +7,7 @@ import {
   createRouter,
 } from '@tanstack/react-router';
 
+import { useFinanceStore } from '@/store';
 import { Salary } from './Salary';
 
 const meta = {
@@ -36,4 +37,40 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  decorators: [
+    (Story) => {
+      useFinanceStore.setState({ salary: null, budgets: [] });
+      return <Story />;
+    },
+  ],
+};
+
+export const SalarySaved: Story = {
+  decorators: [
+    (Story) => {
+      useFinanceStore.setState({ salary: 5000, budgets: [] });
+      return <Story />;
+    },
+  ],
+};
+
+export const SalaryWithBudgets: Story = {
+  decorators: [
+    (Story) => {
+      useFinanceStore.setState({
+        salary: 5000,
+        budgets: [
+          {
+            id: 'rent-1',
+            name: 'Rent',
+            type: 'fixed',
+            value: 2000,
+            category: 'Housing',
+          },
+        ],
+      });
+      return <Story />;
+    },
+  ],
+};

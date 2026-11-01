@@ -100,7 +100,7 @@ All components come from `bosi-design-system`.
 
 - Props: `name`, `value`, `setValue`, `label`, `placeholder`, `error`, `type`, `required`, `disabled`.
 - Use for salary, budget names, and amounts.
-- Pass `type="number"` for numeric inputs.
+- Pass `type="number"` for numeric inputs. Currency fields use `type="text"` so they can show `$` and commas.
 - Use the `error` prop for validation messages.
 - Penpot: `Input` variant component with properties `State` (Default, Filled, Error, Disabled) and `Theme` (Light, Dark).
 
