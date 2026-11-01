@@ -77,16 +77,18 @@ describe('router', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the Result route with a Card', async () => {
+  it('asks for a salary when there is none', async () => {
     await renderRoute('/result');
 
     expect(
       screen.getByRole('heading', { level: 1, name: 'Result' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { level: 3, name: 'Result' }),
+      screen.getByText('Enter your salary to see your result.'),
     ).toBeInTheDocument();
-    expect(screen.getByText('Distribution preview')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Edit budgets' }),
+    ).not.toBeInTheDocument();
   });
 
   it.each(['/', '/salary', '/budgets', '/result'])(

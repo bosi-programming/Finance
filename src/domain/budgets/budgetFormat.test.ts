@@ -47,6 +47,21 @@ describe('formatMoney', () => {
   ])('keeps two decimals otherwise: %s', (value, text) => {
     expect(formatMoney(value)).toBe(text);
   });
+
+  it.each([
+    [-500, '-$500'],
+    [-1234.5, '-$1,234.50'],
+  ])('writes negatives with the sign first: %s', (value, text) => {
+    expect(formatMoney(value)).toBe(text);
+  });
+
+  it('never writes negative zero', () => {
+    expect(formatMoney(-0.001)).toBe('$0');
+  });
+
+  it('rounds float noise to cents', () => {
+    expect(formatMoney(291.00999999999976)).toBe('$291.01');
+  });
 });
 
 describe('formatPercent', () => {

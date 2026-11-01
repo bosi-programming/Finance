@@ -150,6 +150,15 @@ describe('allocateBudgets error flag', () => {
     expect(result.error).toBeNull();
     expect(result.remaining).toBe(0);
   });
+
+  it('sets no error when percentages reach 100 with float noise', () => {
+    const result = allocateBudgets(5000, [
+      { ...travelBudget, value: 0.01 },
+      { ...travelBudget, id: 'travel-2', value: 70.68 },
+      { ...travelBudget, id: 'travel-3', value: 29.31 },
+    ]);
+    expect(result.error).toBeNull();
+  });
 });
 
 describe('allocateBudgets warning flag', () => {
