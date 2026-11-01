@@ -46,11 +46,11 @@ flowchart TD
     List --> Add[Add budget]
     List --> Edit[Edit budget]
     List --> Delete[Delete budget]
-    Add --> Form[Name, type, value, category]
+    Add --> Form[Name, category, value]
     Edit --> Form
     Form --> Category{Category}
     Category -->|existing| SelectCategory[Select from dropdown]
-    Category -->|new| CreateCategory[Enter new category name]
+    Category -->|new| CreateCategory[Enter category name and type]
     SelectCategory --> SaveBudget[Save budget]
     CreateCategory --> SaveBudget
     SaveBudget --> Validate
@@ -66,10 +66,10 @@ flowchart TD
 ```
 
 - `/budgets` lists existing budgets grouped by category.
-- Add budget: name, type (fixed or percentage), value, category.
+- Add budget: name, category, value. A budget takes its type (fixed or percentage) from its category.
 - Category selector:
   - dropdown of existing categories;
-  - "Add new category" option with a required category name.
+  - "New category" option reveals a required category name and a type (fixed or percentage) that the category keeps.
 - Edit and delete actions are available per budget.
 - A category exists only while it holds a budget. With no budgets left, `/budgets` shows its empty state.
 - Validation feedback appears live on `/budgets`:
