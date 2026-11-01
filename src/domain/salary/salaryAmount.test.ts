@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  SALARY_INVALID_MESSAGE,
-  SALARY_REQUIRED_MESSAGE,
-  formatSalary,
-  parseSalary,
-  salaryErrorMessage,
-} from './salaryAmount';
+import { formatSalary, parseSalary, salaryErrorMessage } from './salaryAmount';
 
 describe('parseSalary', () => {
   it.each([
@@ -25,12 +19,20 @@ describe('parseSalary', () => {
     expect(parseSalary(text)).toEqual({ ok: false, reason: 'empty' });
   });
 
-  it.each(['-1', 'abc', '1.234', '1e5', '1,2,3.4.5', '50,00', '.5', '5.'])(
-    'returns invalid for bad text: %s',
-    (text) => {
-      expect(parseSalary(text)).toEqual({ ok: false, reason: 'invalid' });
-    },
-  );
+  it.each([
+    '-1',
+    'abc',
+    '1.234',
+    '1e5',
+    '1,2,3.4.5',
+    '50,00',
+    '.5',
+    '5.',
+    '9'.repeat(400),
+    '12345678901234567890',
+  ])('returns invalid for bad text: %s', (text) => {
+    expect(parseSalary(text)).toEqual({ ok: false, reason: 'invalid' });
+  });
 });
 
 describe('formatSalary', () => {
@@ -46,7 +48,9 @@ describe('formatSalary', () => {
 
 describe('salaryErrorMessage', () => {
   it('maps each reason to its message', () => {
-    expect(salaryErrorMessage('empty')).toBe(SALARY_REQUIRED_MESSAGE);
-    expect(salaryErrorMessage('invalid')).toBe(SALARY_INVALID_MESSAGE);
+    expect(salaryErrorMessage('empty')).toBe('Enter your gross salary.');
+    expect(salaryErrorMessage('invalid')).toBe(
+      'Enter an amount of $ 0.00 or more.',
+    );
   });
 });

@@ -22,7 +22,11 @@ export function parseSalary(text: string): SalaryParseResult {
   if (!AMOUNT_PATTERN.test(compact)) {
     return { ok: false, reason: 'invalid' };
   }
-  return { ok: true, value: Number(compact.replace(/[$,]/g, '')) };
+  const value = Number(compact.replace(/[$,]/g, ''));
+  if (value > Number.MAX_SAFE_INTEGER) {
+    return { ok: false, reason: 'invalid' };
+  }
+  return { ok: true, value };
 }
 
 export function formatSalary(value: number): string {

@@ -73,6 +73,21 @@ describe('Salary page', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('opens the JSON file picker from Import JSON', async () => {
+    const opened: (string | null)[] = [];
+    const spy = vi
+      .spyOn(HTMLInputElement.prototype, 'click')
+      .mockImplementation(function click(this: HTMLInputElement) {
+        opened.push(this.getAttribute('aria-label'));
+      });
+    await renderRoute('/salary');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Import JSON' }));
+
+    expect(opened).toEqual(['Import JSON file']);
+    spy.mockRestore();
+  });
+
   it('shows the saved-salary copy', async () => {
     useFinanceStore.setState({ salary: 5000 });
     await renderRoute('/salary');

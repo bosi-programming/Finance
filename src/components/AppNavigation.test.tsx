@@ -65,6 +65,29 @@ describe('navigation', () => {
     },
   );
 
+  it('puts the route links before the Import and Export actions', async () => {
+    await renderRoute('/salary');
+
+    const links = screen.getByRole('link', { name: 'Result' }).parentElement;
+    const actions = screen.getByRole('button', {
+      name: 'Import',
+    }).parentElement;
+    if (links === null || actions === null) {
+      throw new Error('navigation groups not found');
+    }
+
+    expect(links).not.toBe(actions);
+    expect(links).toContainElement(
+      screen.getByRole('link', { name: 'Salary' }),
+    );
+    expect(actions).toContainElement(
+      screen.getByRole('button', { name: 'Export' }),
+    );
+    expect(
+      links.compareDocumentPosition(actions) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it('marks only the active route', async () => {
     await renderRoute('/budgets');
 
