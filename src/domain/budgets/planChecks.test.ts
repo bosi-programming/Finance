@@ -23,7 +23,7 @@ describe('percentageOverMessage', () => {
 describe('fixedOverSalaryMessage', () => {
   it('names the excess over the salary', () => {
     expect(fixedOverSalaryMessage(500)).toBe(
-      'Fixed budgets exceed your salary by $500.',
+      'Fixed budgets exceed the salary by $500.',
     );
   });
 });

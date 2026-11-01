@@ -10,7 +10,7 @@ export function percentageOverMessage(total: number): string {
 }
 
 export function fixedOverSalaryMessage(excess: number): string {
-  return `Fixed budgets exceed your salary by ${formatMoney(excess)}.`;
+  return `Fixed budgets exceed the salary by ${formatMoney(excess)}.`;
 }
 
 export function isFixedOverSalary(fixedTotal: number, salary: number): boolean {

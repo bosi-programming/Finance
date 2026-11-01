@@ -968,7 +968,7 @@ describe('Budgets page', () => {
     await renderRoute('/budgets');
 
     expect(screen.getByRole('status')).toHaveTextContent(
-      'Fixed budgets exceed your salary by $500.',
+      'Fixed budgets exceed the salary by $500.',
     );
   });
 

@@ -286,7 +286,7 @@ describe('Result page', () => {
       await renderRoute('/result');
 
       expect(screen.getByRole('status')).toHaveTextContent(
-        'Fixed budgets exceed your salary by $1,000.',
+        'Fixed budgets exceed the salary by $1,000.',
       );
     });
 
@@ -327,7 +327,7 @@ describe('Result page', () => {
         'Percentages sum to 110% — must be 100% or less.',
       );
       expect(screen.getByRole('status')).toHaveTextContent(
-        'Fixed budgets exceed your salary by $1,000.',
+        'Fixed budgets exceed the salary by $1,000.',
       );
       expect(
         screen.queryByRole('region', { name: 'Housing' }),
