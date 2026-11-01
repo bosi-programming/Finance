@@ -32,10 +32,8 @@ export interface AppState {
   budgets: Budget[];
 }
 
-export interface StoredRow {
-  version: 'v0';
+export interface StoredRow extends Omit<AppState, 'salary'> {
   salary: number | null;
-  budgets: Budget[];
 }
 
 export interface LegacyCliExport {

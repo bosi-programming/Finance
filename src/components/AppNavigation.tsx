@@ -3,6 +3,7 @@ import { Button, Navigation, NavItem } from 'bosi-design-system/react';
 import { type MouseEvent } from 'react';
 import { useImportFile } from '@/components/useImportFile';
 import { downloadAppState } from '@/persistence/exportFile';
+import { SCHEMA_VERSION } from '@/persistence/schema';
 import { useFinanceStore } from '@/store';
 
 const NAV_ITEMS = [
@@ -43,7 +44,7 @@ export function AppNavigation() {
             disabled={salary === null}
             onClick={() => {
               if (salary !== null) {
-                downloadAppState({ version: 'v0', salary, budgets });
+                downloadAppState({ version: SCHEMA_VERSION, salary, budgets });
               }
             }}
           >

@@ -100,6 +100,32 @@ describe('navigation', () => {
       expect(testRouter.state.location.pathname).toBe('/result');
     });
   });
+
+  it('keeps the click from reloading the page', async () => {
+    await renderRoute('/salary');
+
+    const notPrevented = fireEvent.click(
+      screen.getByRole('link', { name: 'Result' }),
+    );
+
+    expect(notPrevented).toBe(false);
+  });
+
+  it('moves focus to main after navigating', async () => {
+    await renderRoute('/salary');
+
+    await userEvent.click(screen.getByRole('link', { name: 'Result' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('main')).toHaveFocus();
+    });
+  });
+
+  it('does not move focus on first render', async () => {
+    await renderRoute('/salary');
+
+    expect(screen.getByRole('main')).not.toHaveFocus();
+  });
 });
 
 describe('export', () => {
@@ -135,6 +161,33 @@ describe('export', () => {
 
     expect(names).toEqual(['finance-fe-v0.json']);
   });
+
+  it('downloads the current salary and budgets', async () => {
+    const blobs: Blob[] = [];
+    URL.createObjectURL = vi.fn((blob: Blob) => {
+      blobs.push(blob);
+      return 'blob:test';
+    });
+    URL.revokeObjectURL = vi.fn();
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {
+      return undefined;
+    });
+    useFinanceStore.setState({ salary: 5000, budgets: [rent] });
+    await renderRoute('/salary');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Export' }));
+
+    const text = await new Promise<unknown>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result);
+      };
+      reader.readAsText(blobs[0]);
+    });
+    expect(text).toBe(
+      JSON.stringify({ version: 'v0', salary: 5000, budgets: [rent] }, null, 2),
+    );
+  });
 });
 
 describe('Import JSON on salary', () => {
@@ -145,6 +198,13 @@ describe('Import JSON on salary', () => {
 
     expect(screen.getByRole('button', { name: 'Import JSON' })).toBeVisible();
     expect(screen.getByLabelText('Import JSON file')).toBeInTheDocument();
+  });
+
+  it('keeps the native file inputs hidden', async () => {
+    await renderRoute('/salary');
+
+    expect(screen.getByLabelText('Import file')).toHaveAttribute('hidden');
+    expect(screen.getByLabelText('Import JSON file')).toHaveAttribute('hidden');
   });
 
   it('hides Import JSON with a salary', async () => {
@@ -259,6 +319,28 @@ describe('import', () => {
     expect(await db.appState.get('current')).toBeUndefined();
   });
 
+  it('shows the failure toast and changes nothing when the file cannot be read', async () => {
+    useFinanceStore.setState({ salary: 1 });
+    vi.spyOn(FileReader.prototype, 'readAsText').mockImplementation(
+      function readAsText(this: FileReader) {
+        this.onerror?.(new ProgressEvent('error') as ProgressEvent<FileReader>);
+      },
+    );
+    const testRouter = await renderRoute('/budgets');
+
+    await userEvent.upload(
+      screen.getByLabelText('Import file'),
+      jsonFile(withBudgets),
+    );
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      IMPORT_FAILED_MESSAGE,
+    );
+    expect(useFinanceStore.getState().salary).toBe(1);
+    expect(testRouter.state.location.pathname).toBe('/budgets');
+    expect(await db.appState.get('current')).toBeUndefined();
+  });
+
   it('keeps memory, shows the toast and stays when the write fails', async () => {
     useFinanceStore.setState({ salary: 1 });
     vi.spyOn(db.appState, 'put').mockRejectedValue(new Error('write failed'));
@@ -310,11 +392,18 @@ describe('import', () => {
 describe('toast', () => {
   beforeEach(resetPersistence);
 
-  it('shows the toast message in an alert and closes it', async () => {
+  it('shows the toast message in an alert', async () => {
     useFinanceStore.setState({ toast: STORAGE_FAILED_MESSAGE });
+
     await renderRoute('/budgets');
 
     expect(screen.getByRole('alert')).toHaveTextContent(STORAGE_FAILED_MESSAGE);
+  });
+
+  it('clears the toast from its close button', async () => {
+    useFinanceStore.setState({ toast: STORAGE_FAILED_MESSAGE });
+    await renderRoute('/budgets');
+
     await userEvent.click(screen.getByRole('button', { name: 'Close' }));
 
     expect(useFinanceStore.getState().toast).toBeNull();

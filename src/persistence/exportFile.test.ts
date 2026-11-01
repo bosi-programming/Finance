@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { AppState } from '@/types/budget';
+import { type AppState } from '@/types/budget';
 import {
   downloadAppState,
   EXPORT_FILE_NAME,

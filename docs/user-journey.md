@@ -140,7 +140,7 @@ flowchart LR
 - The existing CLI export can be imported after mapping its schema to the app schema.
   - CLI fixed categories (personal, business, subscriptions, fixed investments) map to fixed budgets with user-defined categories.
   - CLI percentage categories (investments, leisure) map to percentage budgets with user-defined categories.
-  - The user can re-categorize during import or after.
+  - The user can re-categorize after import, through budget CRUD.
 - After import, the app redirects to `/result` if budgets are present, otherwise to `/budgets`.
 
 ## Redirect rules

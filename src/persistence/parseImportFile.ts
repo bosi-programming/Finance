@@ -1,4 +1,8 @@
-import { appStateSchema, legacyCliSchema } from '@/persistence/schema';
+import {
+  appStateSchema,
+  legacyCliSchema,
+  SCHEMA_VERSION,
+} from '@/persistence/schema';
 import {
   type AppState,
   type Budget,
@@ -7,39 +11,18 @@ import {
 } from '@/types/budget';
 
 interface LegacyGroup {
-  group: 'fixed' | 'percentage';
-  field: string;
   type: BudgetType;
+  field: string;
   category: string;
 }
 
 const LEGACY_GROUPS: LegacyGroup[] = [
-  { group: 'fixed', field: 'personal', type: 'fixed', category: 'personal' },
-  { group: 'fixed', field: 'business', type: 'fixed', category: 'business' },
-  {
-    group: 'fixed',
-    field: 'subscriptions',
-    type: 'fixed',
-    category: 'subscriptions',
-  },
-  {
-    group: 'fixed',
-    field: 'fixedInvestments',
-    type: 'fixed',
-    category: 'fixed investments',
-  },
-  {
-    group: 'percentage',
-    field: 'investments',
-    type: 'percentage',
-    category: 'investments',
-  },
-  {
-    group: 'percentage',
-    field: 'leisure',
-    type: 'percentage',
-    category: 'leisure',
-  },
+  { type: 'fixed', field: 'personal', category: 'personal' },
+  { type: 'fixed', field: 'business', category: 'business' },
+  { type: 'fixed', field: 'subscriptions', category: 'subscriptions' },
+  { type: 'fixed', field: 'fixedInvestments', category: 'fixed investments' },
+  { type: 'percentage', field: 'investments', category: 'investments' },
+  { type: 'percentage', field: 'leisure', category: 'leisure' },
 ];
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -47,8 +30,8 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const fromLegacy = (file: LegacyCliFile): AppState => {
   const budgets: Budget[] = [];
-  for (const { group, field, type, category } of LEGACY_GROUPS) {
-    const values: Record<string, number | undefined> = file[group] ?? {};
+  for (const { type, field, category } of LEGACY_GROUPS) {
+    const values: Record<string, number | undefined> = file[type] ?? {};
     const value = values[field];
     if (value !== undefined) {
       budgets.push({
@@ -60,7 +43,7 @@ const fromLegacy = (file: LegacyCliFile): AppState => {
       });
     }
   }
-  return { version: 'v0', salary: file.salary, budgets };
+  return { version: SCHEMA_VERSION, salary: file.salary, budgets };
 };
 
 export function parseImportFile(text: string): AppState | null {

@@ -6,6 +6,8 @@ import {
   type StoredRow,
 } from '@/types/budget';
 
+export const SCHEMA_VERSION = 'v0';
+
 const nonEmptyString = z.string().min(1);
 const amount = z.number().nonnegative();
 
@@ -26,13 +28,13 @@ const uniqueBudgets = z
   );
 
 export const appStateSchema: z.ZodType<AppState> = z.strictObject({
-  version: z.literal('v0'),
+  version: z.literal(SCHEMA_VERSION),
   salary: amount,
   budgets: uniqueBudgets,
 });
 
 export const storedRowSchema: z.ZodType<StoredRow> = z.strictObject({
-  version: z.literal('v0'),
+  version: z.literal(SCHEMA_VERSION),
   salary: amount.nullable(),
   budgets: uniqueBudgets,
 });

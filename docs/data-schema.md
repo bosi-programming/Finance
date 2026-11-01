@@ -153,7 +153,7 @@ export interface LegacyCliExport {
 }
 ```
 
-Each group value becomes one budget with a default category. The user can re-categorize during import or later.
+Each group value becomes one budget with a default category. The user can re-categorize after import, through budget CRUD.
 
 ## Remaining
 

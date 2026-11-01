@@ -1,5 +1,5 @@
 import { persist } from '@/persistence/sync';
-import { storedRowSchema } from '@/persistence/schema';
+import { SCHEMA_VERSION, storedRowSchema } from '@/persistence/schema';
 import { type AppState, type Budget } from '@/types/budget';
 import { create } from 'zustand';
 
@@ -44,7 +44,7 @@ interface State {
 export const useFinanceStore = create<State>()((set, get) => {
   const saveCurrent = () => {
     const { salary, budgets } = get();
-    persist({ version: 'v0', salary, budgets }).catch(() => {
+    persist({ version: SCHEMA_VERSION, salary, budgets }).catch(() => {
       set({ toast: STORAGE_FAILED_MESSAGE });
     });
   };
@@ -89,13 +89,20 @@ export const useFinanceStore = create<State>()((set, get) => {
       set({ salary: null, budgets: [] });
     },
     replaceAll: async ({ salary, budgets }) => {
+      const before = get();
       try {
-        await persist({ version: 'v0', salary, budgets });
+        await persist({ version: SCHEMA_VERSION, salary, budgets });
       } catch {
         set({ toast: IMPORT_FAILED_MESSAGE });
         return false;
       }
+      const after = get();
+      const changedDuringWrite =
+        after.salary !== before.salary || after.budgets !== before.budgets;
       set({ salary, budgets });
+      if (changedDuringWrite) {
+        saveCurrent();
+      }
       return true;
     },
     getNetSalary: () => getNetSalary(get().salary, get().budgets),

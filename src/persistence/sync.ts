@@ -9,19 +9,19 @@ export type OkRead = {
 };
 export type LiveRead = OkRead | { status: 'failed' };
 
-let issued = 0;
-let settled = 0;
+let writesIssued = 0;
+let writesSettled = 0;
 
 export function persist(row: StoredRow): Promise<string> {
-  issued += 1;
+  writesIssued += 1;
   return db.appState.put(row, KEY).finally(() => {
-    settled += 1;
+    writesSettled += 1;
   });
 }
 
 export function readCurrent(): Promise<LiveRead> {
-  const stamp = issued;
-  const clean = issued === settled;
+  const stamp = writesIssued;
+  const clean = writesIssued === writesSettled;
   return db.appState.get(KEY).then(
     (row): LiveRead => ({ status: 'ok', row, stamp, clean }),
     (): LiveRead => ({ status: 'failed' }),
@@ -29,5 +29,5 @@ export function readCurrent(): Promise<LiveRead> {
 }
 
 export function isFresh(read: OkRead): boolean {
-  return read.clean && read.stamp === issued;
+  return read.clean && read.stamp === writesIssued;
 }

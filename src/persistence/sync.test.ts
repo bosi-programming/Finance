@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { resetPersistence } from '@/test/resetPersistence';
-import type { StoredRow } from '@/types/budget';
-import { db } from './db';
+import { db } from '@/persistence/db';
+import { type StoredRow } from '@/types/budget';
 import { isFresh, persist, readCurrent } from './sync';
 
 const row: StoredRow = { version: 'v0', salary: 100, budgets: [] };

@@ -5,10 +5,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { STORAGE_FAILED_MESSAGE, useFinanceStore } from '@/store';
 import { resetPersistence } from '@/test/resetPersistence';
-import type { StoredRow } from '@/types/budget';
-import { db } from './db';
+import { db } from '@/persistence/db';
+import { persist } from '@/persistence/sync';
+import { type StoredRow } from '@/types/budget';
 import { PersistenceGate } from './PersistenceGate';
-import { persist } from './sync';
 
 const rent = {
   id: 'rent-1',
@@ -172,6 +172,44 @@ describe('PersistenceGate bad stored row', () => {
 
 describe('PersistenceGate stale results', () => {
   beforeEach(resetPersistence);
+
+  it('drops a result that started before a local write', async () => {
+    render(
+      <PersistenceGate>
+        <Child />
+      </PersistenceGate>,
+    );
+    await screen.findByText('child salary=null budgets=0');
+    const release = vi.fn<(value: StoredRow) => void>();
+    vi.spyOn(db.appState, 'get').mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release.mockImplementation(resolve);
+        }) as ReturnType<typeof db.appState.get>,
+    );
+    await act(async () => {
+      await db.appState.put(row, 'current');
+    });
+    await waitFor(() => {
+      expect(release.getMockImplementation()).toBeDefined();
+    });
+    const salaries: (number | null)[] = [];
+    const unsubscribe = useFinanceStore.subscribe((state) => {
+      salaries.push(state.salary);
+    });
+
+    await act(async () => {
+      useFinanceStore.getState().setSalary(1);
+      release(row);
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
+    });
+    unsubscribe();
+
+    expect(salaries).not.toContain(row.salary);
+    expect(useFinanceStore.getState().salary).toBe(1);
+  });
 
   it('keeps every local edit after a foreign write', async () => {
     render(

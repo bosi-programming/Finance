@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { db } from '@/persistence/db';
 import { resetPersistence } from '@/test/resetPersistence';
-import type { Budget, StoredRow } from '@/types/budget';
+import { type Budget, type StoredRow } from '@/types/budget';
 import {
   IMPORT_FAILED_MESSAGE,
   STORAGE_FAILED_MESSAGE,
@@ -264,7 +264,7 @@ describe('store persistence', () => {
     expect(useFinanceStore.getState().salary).toBe(SALARY);
   });
 
-  it('runs in memory with no storage', () => {
+  it('runs in memory with no storage', async () => {
     db.close();
 
     useFinanceStore.getState().setSalary(SALARY);
@@ -272,6 +272,27 @@ describe('store persistence', () => {
 
     expect(useFinanceStore.getState().salary).toBe(SALARY);
     expect(useFinanceStore.getState().budgets).toEqual([rentBudget]);
+    await vi.waitFor(() => {
+      expect(useFinanceStore.getState().toast).toBe(STORAGE_FAILED_MESSAGE);
+    });
+  });
+
+  it('keeps memory and row on the import when an edit lands during replaceAll', async () => {
+    const imported = {
+      version: 'v0' as const,
+      salary: 9,
+      budgets: [{ ...rentBudget, id: 'imported' }],
+    };
+
+    const replacing = useFinanceStore.getState().replaceAll(imported);
+    useFinanceStore.getState().addBudget({ ...rentBudget, id: 'edit' });
+    await replacing;
+
+    await vi.waitFor(async () => {
+      expect(await db.appState.get('current')).toEqual(imported);
+    });
+    expect(useFinanceStore.getState().salary).toBe(imported.salary);
+    expect(useFinanceStore.getState().budgets).toEqual(imported.budgets);
   });
 
   it('clears the toast', () => {
