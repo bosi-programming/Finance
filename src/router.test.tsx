@@ -3,7 +3,7 @@ import {
   createMemoryHistory,
   createRouter,
 } from '@tanstack/react-router';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -64,20 +64,16 @@ describe('router', () => {
     });
   });
 
-  it('renders the Budgets route with a Selector and its options', async () => {
+  it('renders the Budgets route', async () => {
     await renderRoute('/budgets');
 
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Budgets' }),
-    ).toBeInTheDocument();
-    const selector = screen.getByRole('combobox', { name: 'Budget type' });
-    await userEvent.click(selector);
-    const listbox = screen.getByRole('listbox');
-    expect(
-      within(listbox).getByRole('option', { name: 'Fixed' }),
+      screen.getByRole('heading', { level: 1, name: 'Your budgets' }),
     ).toBeInTheDocument();
     expect(
-      within(listbox).getByRole('option', { name: 'Percentage' }),
+      screen.getByText(
+        'No budgets yet. Add your first one to split your salary.',
+      ),
     ).toBeInTheDocument();
   });
 
