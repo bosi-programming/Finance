@@ -1,3 +1,5 @@
+import { isPercentageOver } from '@/domain/budgets/planChecks';
+import { getFixedBudgetsTotal } from '@/domain/budgets/totals';
 import type {
   AllocationResult,
   Budget,
@@ -17,16 +19,7 @@ export function allocateBudgets(
   salary: number,
   budgets: Budget[],
 ): AllocationResult {
-  let fixedTotal = 0;
-  let percentageSum = 0;
-  for (const budget of budgets) {
-    if (budget.type === 'fixed') {
-      fixedTotal += budget.value;
-    } else {
-      percentageSum += budget.value;
-    }
-  }
-
+  const fixedTotal = getFixedBudgetsTotal(budgets);
   const remainder = salary - fixedTotal;
 
   const allocations: BudgetAllocationItem[] = [];
@@ -45,7 +38,7 @@ export function allocateBudgets(
       (categoryTotals[budget.category] ?? 0) + amount;
   }
 
-  const error = percentageSum > 100 ? ALLOCATION_ERROR_MESSAGE : null;
+  const error = isPercentageOver(budgets) ? ALLOCATION_ERROR_MESSAGE : null;
   const warning = fixedTotal > salary ? ALLOCATION_WARNING_MESSAGE : null;
 
   return {
