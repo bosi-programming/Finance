@@ -3,11 +3,12 @@ import {
   createMemoryHistory,
   createRouter,
 } from '@tanstack/react-router';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { routeTree } from './router';
+import { resetPersistence } from '@/test/resetPersistence';
 
 async function renderRoute(path: string) {
   const testRouter = createRouter({
@@ -17,9 +18,12 @@ async function renderRoute(path: string) {
   await testRouter.load();
 
   render(<RouterProvider router={testRouter} />);
+  return testRouter;
 }
 
 describe('router', () => {
+  beforeEach(resetPersistence);
+
   it('renders the Home route with a heading and a Button', async () => {
     await renderRoute('/');
 
@@ -35,14 +39,29 @@ describe('router', () => {
     await renderRoute('/salary');
 
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Salary' }),
+      screen.getByRole('heading', {
+        level: 1,
+        name: "What's your gross salary?",
+      }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('spinbutton', { name: 'Salary' }),
+      screen.getByRole('textbox', { name: 'Gross salary' }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText('Enter your salary'),
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('$ 0.00')).toBeInTheDocument();
+  });
+
+  it('Continue on /salary lands on /budgets', async () => {
+    const testRouter = await renderRoute('/salary');
+
+    await userEvent.type(
+      screen.getByRole('textbox', { name: 'Gross salary' }),
+      '5000',
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+    await waitFor(() => {
+      expect(testRouter.state.location.pathname).toBe('/budgets');
+    });
   });
 
   it('renders the Budgets route with a Selector and its options', async () => {
