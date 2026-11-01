@@ -429,6 +429,16 @@ describe('Result page', () => {
   });
 
   describe('missing data', () => {
+    it('shows the plan for a salary of 0', async () => {
+      useFinanceStore.setState({ salary: 0, budgets: [] });
+      await renderRoute('/result');
+
+      expect(within(region('Salary')).getByText('$0')).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'Enter salary' }),
+      ).not.toBeInTheDocument();
+    });
+
     it('Enter salary goes to salary', async () => {
       const testRouter = await renderRoute('/result');
 
