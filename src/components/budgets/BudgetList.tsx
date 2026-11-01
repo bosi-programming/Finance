@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { Typography } from 'bosi-design-system/react';
+import { IconButton, Typography } from 'bosi-design-system/react';
 
 import {
   budgetDetails,
@@ -9,7 +9,13 @@ import {
 } from '@/domain/budgets/budgetFormat';
 import { type Budget } from '@/types/budget';
 
-function BudgetGroupSection({ group }: { group: BudgetGroup }) {
+function BudgetGroupSection({
+  group,
+  onEdit,
+}: {
+  group: BudgetGroup;
+  onEdit: (budget: Budget) => void;
+}) {
   const headingId = useId();
 
   return (
@@ -27,6 +33,13 @@ function BudgetGroupSection({ group }: { group: BudgetGroup }) {
             <Typography size="details" as="p">
               {budgetDetails(budget)}
             </Typography>
+            <IconButton
+              action="edit"
+              aria-label={`Edit ${budget.name}`}
+              onClick={() => {
+                onEdit(budget);
+              }}
+            />
           </li>
         ))}
       </ul>
@@ -34,11 +47,21 @@ function BudgetGroupSection({ group }: { group: BudgetGroup }) {
   );
 }
 
-export function BudgetList({ budgets }: { budgets: Budget[] }) {
+export function BudgetList({
+  budgets,
+  onEdit,
+}: {
+  budgets: Budget[];
+  onEdit: (budget: Budget) => void;
+}) {
   return (
     <>
       {groupBudgets(budgets).map((group) => (
-        <BudgetGroupSection key={group.category} group={group} />
+        <BudgetGroupSection
+          key={group.category}
+          group={group}
+          onEdit={onEdit}
+        />
       ))}
     </>
   );

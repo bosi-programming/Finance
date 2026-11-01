@@ -528,4 +528,102 @@ describe('Budgets page', () => {
     ).toBeInTheDocument();
     expect(useFinanceStore.getState().budgets).toEqual([]);
   });
+
+  async function openEditDialog(
+    user: ReturnType<typeof userEvent.setup>,
+    name: string,
+  ) {
+    await user.click(screen.getByRole('button', { name: `Edit ${name}` }));
+    return screen.getByRole('dialog', { name: 'Edit budget' });
+  }
+
+  it('opens a seeded edit dialog', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+
+    const dialog = await openEditDialog(user, 'Rent');
+
+    expect(within(dialog).getByRole('textbox', { name: 'Name' })).toHaveValue(
+      'Rent',
+    );
+    expect(within(dialog).getByRole('textbox', { name: 'Value' })).toHaveValue(
+      '$ 2,000.00',
+    );
+    expect(
+      within(dialog).getByRole('combobox', { name: 'Type' }),
+    ).toHaveTextContent('Fixed');
+    expect(
+      within(dialog).getByRole('combobox', { name: 'Category' }),
+    ).toHaveTextContent('Housing');
+  });
+
+  it('saves an edit under the same id', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+    const dialog = await openEditDialog(user, 'Rent');
+
+    const value = within(dialog).getByRole('textbox', { name: 'Value' });
+    await user.clear(value);
+    await user.type(value, '2500');
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(useFinanceStore.getState().budgets).toEqual([
+      { ...rent, value: 2500 },
+    ]);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText('Fixed · $2,500 / month')).toBeInTheDocument();
+  });
+
+  it('moves a budget to another category', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent, fun] });
+    await renderRoute('/budgets');
+    const dialog = await openEditDialog(user, 'Rent');
+
+    await pickCategory(user, dialog, 'Leisure');
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(
+      screen.queryByRole('region', { name: 'Housing' }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(screen.getByRole('region', { name: 'Leisure' })).getByText(
+        '$2,000 · 60%',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('cancel leaves the budget unchanged', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+    const dialog = await openEditDialog(user, 'Rent');
+
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Name' }),
+      ' Extra',
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+
+    expect(useFinanceStore.getState().budgets).toEqual([rent]);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('Escape leaves the budget unchanged', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+    const dialog = await openEditDialog(user, 'Rent');
+
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Name' }),
+      ' Extra',
+    );
+    await user.keyboard('{Escape}');
+
+    expect(useFinanceStore.getState().budgets).toEqual([rent]);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
 });

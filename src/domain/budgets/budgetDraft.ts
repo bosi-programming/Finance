@@ -1,4 +1,7 @@
-import { parseBudgetValue } from '@/domain/budgets/budgetValue';
+import {
+  formatValueInput,
+  parseBudgetValue,
+} from '@/domain/budgets/budgetValue';
 import { type Budget, type BudgetType } from '@/types/budget';
 
 export interface BudgetDraft {
@@ -18,6 +21,17 @@ export const EMPTY_DRAFT: BudgetDraft = {
   addingCategory: false,
   newCategory: '',
 };
+
+export function draftFromBudget(budget: Budget): BudgetDraft {
+  return {
+    name: budget.name,
+    type: budget.type,
+    valueText: formatValueInput(budget),
+    category: budget.category,
+    addingCategory: false,
+    newCategory: '',
+  };
+}
 
 export type BudgetDraftField = 'name' | 'type' | 'value' | 'category';
 export type BudgetDraftErrors = Partial<Record<BudgetDraftField, string>>;

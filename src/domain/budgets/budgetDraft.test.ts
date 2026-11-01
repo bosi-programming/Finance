@@ -5,10 +5,12 @@ import {
   BUDGET_NAME_REQUIRED_MESSAGE,
   BUDGET_TYPE_REQUIRED_MESSAGE,
   EMPTY_DRAFT,
+  draftFromBudget,
   FIXED_VALUE_INVALID_MESSAGE,
   PERCENTAGE_VALUE_INVALID_MESSAGE,
   validateBudgetDraft,
 } from './budgetDraft';
+import type { Budget } from '@/types/budget';
 
 describe('validateBudgetDraft', () => {
   it('returns fields for a valid draft', () => {
@@ -110,6 +112,42 @@ describe('validateBudgetDraft', () => {
     ).toEqual({
       ok: false,
       errors: { category: BUDGET_CATEGORY_REQUIRED_MESSAGE },
+    });
+  });
+});
+
+describe('draftFromBudget', () => {
+  it('seeds a fixed and a percentage budget', () => {
+    const rent: Budget = {
+      id: 'rent-1',
+      name: 'Rent',
+      type: 'fixed',
+      value: 2000,
+      category: 'Housing',
+    };
+    const fun: Budget = {
+      id: 'fun-1',
+      name: 'Fun',
+      type: 'percentage',
+      value: 60,
+      category: 'Leisure',
+    };
+
+    expect(draftFromBudget(rent)).toEqual({
+      name: 'Rent',
+      type: 'fixed',
+      valueText: '$ 2,000.00',
+      category: 'Housing',
+      addingCategory: false,
+      newCategory: '',
+    });
+    expect(draftFromBudget(fun)).toEqual({
+      name: 'Fun',
+      type: 'percentage',
+      valueText: '60%',
+      category: 'Leisure',
+      addingCategory: false,
+      newCategory: '',
     });
   });
 });

@@ -3,7 +3,7 @@ import { Button, Paper, Typography } from 'bosi-design-system/react';
 
 import { BudgetFormModal } from '@/components/budgets/BudgetFormModal';
 import { BudgetList } from '@/components/budgets/BudgetList';
-import { EMPTY_DRAFT } from '@/domain/budgets/budgetDraft';
+import { draftFromBudget, EMPTY_DRAFT } from '@/domain/budgets/budgetDraft';
 import { groupBudgets } from '@/domain/budgets/budgetFormat';
 import { useFinanceStore } from '@/store';
 import { type Budget } from '@/types/budget';
@@ -20,6 +20,7 @@ const LIST_HINT = 'Add, edit, and delete fixed and percentage budgets.';
 export function Budgets() {
   const budgets = useFinanceStore((state) => state.budgets);
   const addBudget = useFinanceStore((state) => state.addBudget);
+  const updateBudget = useFinanceStore((state) => state.updateBudget);
   const [dialog, setDialog] = useState<BudgetDialog>(null);
   const hasBudgets = budgets.length > 0;
 
@@ -27,7 +28,14 @@ export function Budgets() {
     <Paper className="flex w-full flex-col gap-8 md:w-[400px]">
       <Typography size="h1">Your budgets</Typography>
       <Typography size="body">{hasBudgets ? LIST_HINT : EMPTY_HINT}</Typography>
-      {hasBudgets && <BudgetList budgets={budgets} />}
+      {hasBudgets && (
+        <BudgetList
+          budgets={budgets}
+          onEdit={(budget) => {
+            setDialog({ kind: 'edit', budget });
+          }}
+        />
+      )}
       <Button
         color="primary"
         size="full-width"
@@ -44,6 +52,20 @@ export function Budgets() {
           categories={groupBudgets(budgets).map((group) => group.category)}
           onSave={(fields) => {
             addBudget({ id: crypto.randomUUID(), ...fields });
+            setDialog(null);
+          }}
+          onCancel={() => {
+            setDialog(null);
+          }}
+        />
+      )}
+      {dialog?.kind === 'edit' && (
+        <BudgetFormModal
+          mode="edit"
+          initialDraft={draftFromBudget(dialog.budget)}
+          categories={groupBudgets(budgets).map((group) => group.category)}
+          onSave={(fields) => {
+            updateBudget({ id: dialog.budget.id, ...fields });
             setDialog(null);
           }}
           onCancel={() => {
