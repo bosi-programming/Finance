@@ -28,12 +28,12 @@ export function AppNavigation() {
 
   return (
     <Navigation
-      items={NAV_ITEMS.map(({ to, label }) => (
+      leftItems={NAV_ITEMS.map(({ to, label }) => (
         <NavItem key={to} href={to} active={pathname === to} onClick={goTo(to)}>
           {label}
         </NavItem>
       ))}
-      actions={
+      rightItems={
         <>
           <Button color="primary" size="small" onClick={openFilePicker}>
             Import

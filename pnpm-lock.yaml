@@ -16,7 +16,7 @@ importers:
         version: 1.167.1(@tanstack/react-router@1.170.19(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@tanstack/router-core@1.171.16)(csstype@3.2.3)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       bosi-design-system:
         specifier: github:bosi-programming/bosi-design-system
-        version: https://codeload.github.com/bosi-programming/bosi-design-system/tar.gz/e2a0d05b43b332f54e813a1c716a930b69efbd68(svelte@5.56.5(@typescript-eslint/types@8.64.0))(ts-pattern@5.9.0)
+        version: https://codeload.github.com/bosi-programming/bosi-design-system/tar.gz/9363b8e9ed638370c0bfc088645d332545931bc8(svelte@5.56.5(@typescript-eslint/types@8.64.0))(ts-pattern@5.9.0)
       dexie:
         specifier: 4.4.7
         version: 4.4.7
@@ -1953,9 +1953,9 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  bosi-design-system@https://codeload.github.com/bosi-programming/bosi-design-system/tar.gz/e2a0d05b43b332f54e813a1c716a930b69efbd68:
-    resolution: {tarball: https://codeload.github.com/bosi-programming/bosi-design-system/tar.gz/e2a0d05b43b332f54e813a1c716a930b69efbd68}
-    version: 0.10.0
+  bosi-design-system@https://codeload.github.com/bosi-programming/bosi-design-system/tar.gz/9363b8e9ed638370c0bfc088645d332545931bc8:
+    resolution: {tarball: https://codeload.github.com/bosi-programming/bosi-design-system/tar.gz/9363b8e9ed638370c0bfc088645d332545931bc8}
+    version: 0.11.0
     peerDependencies:
       svelte: ^5.0.0
       ts-pattern: ^5.8.0
@@ -5642,7 +5642,7 @@ snapshots:
 
   baseline-browser-mapping@2.10.43: {}
 
-  bosi-design-system@https://codeload.github.com/bosi-programming/bosi-design-system/tar.gz/e2a0d05b43b332f54e813a1c716a930b69efbd68(svelte@5.56.5(@typescript-eslint/types@8.64.0))(ts-pattern@5.9.0):
+  bosi-design-system@https://codeload.github.com/bosi-programming/bosi-design-system/tar.gz/9363b8e9ed638370c0bfc088645d332545931bc8(svelte@5.56.5(@typescript-eslint/types@8.64.0))(ts-pattern@5.9.0):
     dependencies:
       svelte: 5.56.5(@typescript-eslint/types@8.64.0)
       ts-pattern: 5.9.0
