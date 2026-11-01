@@ -1,5 +1,7 @@
 export type BudgetType = 'fixed' | 'percentage';
 
+export const SCHEMA_VERSION = 'v0' as const;
+
 export interface Budget {
   id: string;
   name: string;
@@ -27,7 +29,7 @@ export interface AllocationResult {
 }
 
 export interface AppState {
-  version: 'v0';
+  version: typeof SCHEMA_VERSION;
   salary: number;
   budgets: Budget[];
 }

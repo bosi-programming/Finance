@@ -1,17 +1,27 @@
-import { persist } from '@/persistence/sync';
-import { SCHEMA_VERSION, storedRowSchema } from '@/persistence/schema';
+import { storedRowSchema } from '@/persistence/schema';
 import {
   getFixedBudgetsTotal,
   getNetSalary,
   getTotalPercentage,
 } from '@/domain/budgets/totals';
-import { type AppState, type Budget } from '@/types/budget';
+import { SCHEMA_VERSION, type AppState, type Budget } from '@/types/budget';
+import { type StoragePort } from '@/types/storage';
 import { create } from 'zustand';
 
 export const STORAGE_FAILED_MESSAGE =
   'Your data could not be saved in this browser.';
 export const IMPORT_FAILED_MESSAGE =
   'Import failed. Your data was not changed.';
+
+const noopStorage: StoragePort = {
+  persist: async () => {},
+};
+
+let storage: StoragePort = noopStorage;
+
+export const configureStorage = (port: StoragePort) => {
+  storage = port;
+};
 
 interface State {
   salary: number | null;
@@ -33,7 +43,7 @@ interface State {
 export const useFinanceStore = create<State>()((set, get) => {
   const saveCurrent = () => {
     const { salary, budgets } = get();
-    persist({ version: SCHEMA_VERSION, salary, budgets }).catch(() => {
+    storage.persist({ version: SCHEMA_VERSION, salary, budgets }).catch(() => {
       set({ toast: STORAGE_FAILED_MESSAGE });
     });
   };
@@ -83,7 +93,7 @@ export const useFinanceStore = create<State>()((set, get) => {
     replaceAll: async ({ salary, budgets }) => {
       const before = get();
       try {
-        await persist({ version: SCHEMA_VERSION, salary, budgets });
+        await storage.persist({ version: SCHEMA_VERSION, salary, budgets });
       } catch {
         set({ toast: IMPORT_FAILED_MESSAGE });
         return false;

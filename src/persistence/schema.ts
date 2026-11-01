@@ -1,12 +1,11 @@
 import { z } from 'zod';
 import {
+  SCHEMA_VERSION,
   type AppState,
   type Budget,
   type LegacyCliFile,
   type StoredRow,
 } from '@/types/budget';
-
-export const SCHEMA_VERSION = 'v0';
 
 const nonEmptyString = z.string().min(1);
 const amount = z.number().nonnegative();

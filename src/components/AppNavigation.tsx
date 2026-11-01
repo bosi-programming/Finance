@@ -3,8 +3,8 @@ import { Button, Navigation, NavItem } from 'bosi-design-system/react';
 import { type MouseEvent } from 'react';
 import { useImportFile } from '@/components/useImportFile';
 import { downloadAppState } from '@/persistence/exportFile';
-import { SCHEMA_VERSION } from '@/persistence/schema';
 import { useFinanceStore } from '@/store';
+import { SCHEMA_VERSION } from '@/types/budget';
 
 const NAV_ITEMS = [
   { to: '/salary', label: 'Salary' },

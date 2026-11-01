@@ -1,9 +1,6 @@
+import { appStateSchema, legacyCliSchema } from '@/persistence/schema';
 import {
-  appStateSchema,
-  legacyCliSchema,
   SCHEMA_VERSION,
-} from '@/persistence/schema';
-import {
   type AppState,
   type Budget,
   type BudgetType,
