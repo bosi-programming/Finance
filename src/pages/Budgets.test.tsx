@@ -208,12 +208,6 @@ describe('Budgets page', () => {
       within(dialog).getByRole('textbox', { name: 'Name' }),
       'Rent',
     );
-    await user.click(within(dialog).getByRole('combobox', { name: 'Type' }));
-    await user.click(screen.getByRole('option', { name: 'Fixed' }));
-    await user.type(
-      within(dialog).getByRole('textbox', { name: 'Value' }),
-      '2000',
-    );
     await user.click(
       within(dialog).getByRole('combobox', { name: 'Category' }),
     );
@@ -223,6 +217,12 @@ describe('Budgets page', () => {
     await user.type(
       within(dialog).getByRole('textbox', { name: 'New category' }),
       'Housing',
+    );
+    await user.click(within(dialog).getByRole('combobox', { name: 'Type' }));
+    await user.click(screen.getByRole('option', { name: 'Fixed' }));
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Value' }),
+      '2000',
     );
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
@@ -252,8 +252,6 @@ describe('Budgets page', () => {
       within(dialog).getByRole('textbox', { name: 'Name' }),
       'Fun',
     );
-    await user.click(within(dialog).getByRole('combobox', { name: 'Type' }));
-    await user.click(screen.getByRole('option', { name: 'Percentage' }));
     await user.type(
       within(dialog).getByRole('textbox', { name: 'Value' }),
       '60',
@@ -264,12 +262,16 @@ describe('Budgets page', () => {
     await user.click(screen.getByRole('option', { name: 'Housing' }));
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
-    expect(useFinanceStore.getState().budgets).toHaveLength(2);
-    expect(
-      within(screen.getByRole('region', { name: 'Housing' })).getByText(
-        '$2,000 · 60%',
-      ),
-    ).toBeInTheDocument();
+    expect(useFinanceStore.getState().budgets).toEqual([
+      rent,
+      {
+        id: expect.any(String) as string,
+        name: 'Fun',
+        type: 'fixed',
+        value: 60,
+        category: 'Housing',
+      },
+    ]);
   });
 
   it('offers the categories in use', async () => {
@@ -299,8 +301,6 @@ describe('Budgets page', () => {
       within(dialog).getByRole('textbox', { name: 'Name' }),
       'Fun',
     );
-    await user.click(within(dialog).getByRole('combobox', { name: 'Type' }));
-    await user.click(screen.getByRole('option', { name: 'Percentage' }));
     await user.type(
       within(dialog).getByRole('textbox', { name: 'Value' }),
       '60',
@@ -356,8 +356,8 @@ describe('Budgets page', () => {
       within(dialog).getByText(BUDGET_NAME_REQUIRED_MESSAGE),
     ).toBeInTheDocument();
     expect(
-      within(dialog).getByText(BUDGET_TYPE_REQUIRED_MESSAGE),
-    ).toBeInTheDocument();
+      within(dialog).queryByText(BUDGET_TYPE_REQUIRED_MESSAGE),
+    ).not.toBeInTheDocument();
     expect(
       within(dialog).getByText(BUDGET_CATEGORY_REQUIRED_MESSAGE),
     ).toBeInTheDocument();
@@ -367,6 +367,22 @@ describe('Budgets page', () => {
     expect(useFinanceStore.getState().budgets).toEqual([]);
   });
 
+  it('shows the type error on a new category without a type', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+    await pickCategory(user, dialog, '+ Add new category');
+
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(
+      within(dialog).getByText(BUDGET_TYPE_REQUIRED_MESSAGE),
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).getByRole('combobox', { name: 'Type' }),
+    ).toHaveAttribute('aria-invalid', 'true');
+  });
+
   it('rejects a blank name', async () => {
     const user = userEvent.setup();
     await renderRoute('/budgets');
@@ -374,15 +390,15 @@ describe('Budgets page', () => {
     const name = within(dialog).getByRole('textbox', { name: 'Name' });
 
     await user.type(name, '   ');
-    await pickType(user, dialog, 'Fixed');
-    await user.type(
-      within(dialog).getByRole('textbox', { name: 'Value' }),
-      '2000',
-    );
     await pickCategory(user, dialog, '+ Add new category');
     await user.type(
       within(dialog).getByRole('textbox', { name: 'New category' }),
       'Housing',
+    );
+    await pickType(user, dialog, 'Fixed');
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Value' }),
+      '2000',
     );
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
@@ -398,6 +414,7 @@ describe('Budgets page', () => {
     await renderRoute('/budgets');
     const dialog = await openAddDialog(user);
 
+    await pickCategory(user, dialog, '+ Add new category');
     await pickType(user, dialog, 'Fixed');
     await user.type(
       within(dialog).getByRole('textbox', { name: 'Value' }),
@@ -415,6 +432,7 @@ describe('Budgets page', () => {
     await renderRoute('/budgets');
     const dialog = await openAddDialog(user);
 
+    await pickCategory(user, dialog, '+ Add new category');
     await pickType(user, dialog, 'Percentage');
     await user.type(
       within(dialog).getByRole('textbox', { name: 'Value' }),
@@ -452,9 +470,6 @@ describe('Budgets page', () => {
       within(dialog).queryByText(BUDGET_NAME_REQUIRED_MESSAGE),
     ).not.toBeInTheDocument();
     expect(
-      within(dialog).getByText(BUDGET_TYPE_REQUIRED_MESSAGE),
-    ).toBeInTheDocument();
-    expect(
       within(dialog).getByText(BUDGET_CATEGORY_REQUIRED_MESSAGE),
     ).toBeInTheDocument();
   });
@@ -463,8 +478,8 @@ describe('Budgets page', () => {
     const user = userEvent.setup();
     await renderRoute('/budgets');
     const dialog = await openAddDialog(user);
-    await user.click(within(dialog).getByRole('combobox', { name: 'Type' }));
-    await user.click(screen.getByRole('option', { name: 'Fixed' }));
+    await pickCategory(user, dialog, '+ Add new category');
+    await pickType(user, dialog, 'Fixed');
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
     expect(
       within(dialog).getByText(FIXED_VALUE_INVALID_MESSAGE),
@@ -525,12 +540,11 @@ describe('Budgets page', () => {
       within(dialog).getByRole('textbox', { name: 'Name' }),
       'Rent',
     );
-    await pickType(user, dialog, 'Fixed');
+    await pickCategory(user, dialog, 'Housing');
     await user.type(
       within(dialog).getByRole('textbox', { name: 'Value' }),
       '2000',
     );
-    await pickCategory(user, dialog, 'Housing');
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     const budgets = useFinanceStore.getState().budgets;
@@ -544,6 +558,7 @@ describe('Budgets page', () => {
     const dialog = await openAddDialog(user);
     const value = within(dialog).getByRole('textbox', { name: 'Value' });
 
+    await pickCategory(user, dialog, '+ Add new category');
     await pickType(user, dialog, 'Fixed');
     expect(value).toHaveAttribute('placeholder', '$ 0.00');
 
@@ -557,6 +572,7 @@ describe('Budgets page', () => {
     const dialog = await openAddDialog(user);
     const value = within(dialog).getByRole('textbox', { name: 'Value' });
 
+    await pickCategory(user, dialog, '+ Add new category');
     await pickType(user, dialog, 'Fixed');
     await user.type(value, '50');
     await pickType(user, dialog, 'Percentage');
@@ -569,6 +585,7 @@ describe('Budgets page', () => {
     await renderRoute('/budgets');
     const dialog = await openAddDialog(user);
 
+    await pickCategory(user, dialog, '+ Add new category');
     await pickType(user, dialog, 'Fixed');
     await user.type(
       within(dialog).getByRole('textbox', { name: 'Value' }),
@@ -598,23 +615,114 @@ describe('Budgets page', () => {
       within(dialog).getByRole('textbox', { name: 'Name' }),
       'Fun',
     );
+    await pickCategory(user, dialog, '+ Add new category');
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'New category' }),
+      'Leisure',
+    );
     await pickType(user, dialog, 'Fixed');
     await user.type(
       within(dialog).getByRole('textbox', { name: 'Value' }),
       '150',
     );
     await pickType(user, dialog, 'Percentage');
-    await pickCategory(user, dialog, '+ Add new category');
-    await user.type(
-      within(dialog).getByRole('textbox', { name: 'New category' }),
-      'Leisure',
-    );
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     expect(
       within(dialog).getByText(PERCENTAGE_VALUE_INVALID_MESSAGE),
     ).toBeInTheDocument();
     expect(useFinanceStore.getState().budgets).toEqual([]);
+  });
+
+  it('takes the type from an existing category', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent, fun] });
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+    const value = within(dialog).getByRole('textbox', { name: 'Value' });
+
+    await pickCategory(user, dialog, 'Housing');
+    expect(value).toHaveAttribute('placeholder', '$ 0.00');
+    expect(
+      within(dialog).queryByRole('combobox', { name: 'Type' }),
+    ).not.toBeInTheDocument();
+
+    await pickCategory(user, dialog, 'Leisure');
+    expect(value).toHaveAttribute('placeholder', '0%');
+  });
+
+  it('takes the first budget type in a mixed category', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({
+      budgets: [rent, { ...fun, id: 'mix-1', category: 'Housing' }],
+    });
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+
+    await pickCategory(user, dialog, 'Housing');
+
+    expect(
+      within(dialog).getByRole('textbox', { name: 'Value' }),
+    ).toHaveAttribute('placeholder', '$ 0.00');
+  });
+
+  it('shows New category as chosen with its name and type below', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+
+    await pickCategory(user, dialog, '+ Add new category');
+
+    expect(
+      within(dialog).getByRole('combobox', { name: 'Category' }),
+    ).toHaveTextContent('New category');
+    const names = within(dialog)
+      .getAllByRole('textbox')
+      .map((field) => field.getAttribute('name'));
+    expect(names).toEqual([
+      'budget-name',
+      'budget-new-category',
+      'budget-value',
+    ]);
+    const newCategory = within(dialog).getByRole('textbox', {
+      name: 'New category',
+    });
+    const type = within(dialog).getByRole('combobox', { name: 'Type' });
+    expect(
+      newCategory.compareDocumentPosition(type) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it('drops the type when switching to a new category', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+
+    await pickCategory(user, dialog, 'Housing');
+    await pickCategory(user, dialog, '+ Add new category');
+
+    expect(
+      within(dialog).getByRole('combobox', { name: 'Type' }),
+    ).not.toHaveTextContent('Fixed');
+  });
+
+  it('shows the name and type when editing into a new category', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+    const dialog = await openEditDialog(user, 'Rent');
+
+    await pickCategory(user, dialog, '+ Add new category');
+
+    expect(
+      within(dialog).getByRole('textbox', { name: 'New category' }),
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).getByRole('combobox', { name: 'Type' }),
+    ).toBeInTheDocument();
   });
 
   async function openEditDialog(
@@ -639,8 +747,8 @@ describe('Budgets page', () => {
       '$ 2,000.00',
     );
     expect(
-      within(dialog).getByRole('combobox', { name: 'Type' }),
-    ).toHaveTextContent('Fixed');
+      within(dialog).queryByRole('combobox', { name: 'Type' }),
+    ).not.toBeInTheDocument();
     expect(
       within(dialog).getByRole('combobox', { name: 'Category' }),
     ).toHaveTextContent('Housing');
@@ -666,19 +774,20 @@ describe('Budgets page', () => {
 
   it('moves a budget to another category', async () => {
     const user = userEvent.setup();
-    useFinanceStore.setState({ budgets: [rent, fun] });
+    const utilities: Budget = { ...power, id: 'util-1', category: 'Utilities' };
+    useFinanceStore.setState({ budgets: [rent, utilities] });
     await renderRoute('/budgets');
     const dialog = await openEditDialog(user, 'Rent');
 
-    await pickCategory(user, dialog, 'Leisure');
+    await pickCategory(user, dialog, 'Utilities');
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     expect(
       screen.queryByRole('region', { name: 'Housing' }),
     ).not.toBeInTheDocument();
     expect(
-      within(screen.getByRole('region', { name: 'Leisure' })).getByText(
-        '$2,000 · 60%',
+      within(screen.getByRole('region', { name: 'Utilities' })).getByText(
+        'Rent',
       ),
     ).toBeInTheDocument();
   });
@@ -832,8 +941,6 @@ describe('Budgets page', () => {
       within(dialog).getByRole('textbox', { name: 'Name' }),
       'Savings',
     );
-    await user.click(within(dialog).getByRole('combobox', { name: 'Type' }));
-    await user.click(screen.getByRole('option', { name: 'Percentage' }));
     await user.type(
       within(dialog).getByRole('textbox', { name: 'Value' }),
       '50',

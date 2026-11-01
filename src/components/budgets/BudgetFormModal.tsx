@@ -14,10 +14,13 @@ export interface BudgetFormModalProps {
   mode: 'add' | 'edit';
   initialDraft: BudgetDraft;
   categories: string[];
+  categoryTypes: Record<string, BudgetType>;
   onSave: (fields: Omit<Budget, 'id'>) => void;
   onCancel: () => void;
   onDelete?: () => void;
 }
+
+const NEW_CATEGORY_ID = '__new-category__';
 
 const TYPE_OPTIONS = [
   { id: 'fixed', label: 'Fixed' },
@@ -28,6 +31,7 @@ export function BudgetFormModal({
   mode,
   initialDraft,
   categories,
+  categoryTypes,
   onSave,
   onCancel,
   onDelete,
@@ -92,19 +96,68 @@ export function BudgetFormModal({
           }}
         />
         <Selector
-          name="budget-type"
-          label="Type"
-          placeholder="Select a type"
-          options={TYPE_OPTIONS}
-          value={draft.type}
-          error={errors.type}
+          name="budget-category"
+          label="Category"
+          placeholder="Select a category"
+          options={[
+            ...categories.map((category) => ({
+              id: category,
+              label: category,
+            })),
+            ...(draft.addingCategory
+              ? [{ id: NEW_CATEGORY_ID, label: 'New category' }]
+              : []),
+          ]}
+          value={draft.addingCategory ? NEW_CATEGORY_ID : draft.category}
+          error={draft.addingCategory ? undefined : errors.category}
           onChange={(event) => {
-            update({ type: event.target.value as BudgetType }, [
+            const category = event.target.value;
+            update(
+              {
+                category,
+                addingCategory: false,
+                type: categoryTypes[category] ?? '',
+              },
+              ['category', 'type', 'value'],
+            );
+          }}
+          onAddNew={() => {
+            update({ addingCategory: true, type: '' }, [
+              'category',
               'type',
               'value',
             ]);
           }}
+          addNewLabel="+ Add new category"
         />
+        {draft.addingCategory && (
+          <>
+            <Input
+              name="budget-new-category"
+              label="New category"
+              placeholder="Category name"
+              value={draft.newCategory}
+              error={errors.category}
+              setValue={(newCategory) => {
+                update({ newCategory }, ['category']);
+              }}
+            />
+            <Selector
+              name="budget-type"
+              label="Type"
+              placeholder="Select a type"
+              options={TYPE_OPTIONS}
+              value={draft.type}
+              error={errors.type}
+              onChange={(event) => {
+                update({ type: event.target.value as BudgetType }, [
+                  'type',
+                  'value',
+                ]);
+              }}
+            />
+          </>
+        )}
         <Input
           name="budget-value"
           label="Value"
@@ -116,38 +169,6 @@ export function BudgetFormModal({
             update({ valueText }, ['value']);
           }}
         />
-        <Selector
-          name="budget-category"
-          label="Category"
-          placeholder="Select a category"
-          options={categories.map((category) => ({
-            id: category,
-            label: category,
-          }))}
-          value={draft.addingCategory ? '' : draft.category}
-          error={draft.addingCategory ? undefined : errors.category}
-          onChange={(event) => {
-            update({ category: event.target.value, addingCategory: false }, [
-              'category',
-            ]);
-          }}
-          onAddNew={() => {
-            update({ addingCategory: true }, ['category']);
-          }}
-          addNewLabel="+ Add new category"
-        />
-        {draft.addingCategory && (
-          <Input
-            name="budget-new-category"
-            label="New category"
-            placeholder="Category name"
-            value={draft.newCategory}
-            error={errors.category}
-            setValue={(newCategory) => {
-              update({ newCategory }, ['category']);
-            }}
-          />
-        )}
       </div>
     </Modal>
   );

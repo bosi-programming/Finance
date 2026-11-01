@@ -5,7 +5,11 @@ import { Banner, Button, Paper, Typography } from 'bosi-design-system/react';
 import { BudgetFormModal } from '@/components/budgets/BudgetFormModal';
 import { BudgetList } from '@/components/budgets/BudgetList';
 import { DeleteBudgetModal } from '@/components/budgets/DeleteBudgetModal';
-import { draftFromBudget, EMPTY_DRAFT } from '@/domain/budgets/budgetDraft';
+import {
+  categoryTypes,
+  draftFromBudget,
+  EMPTY_DRAFT,
+} from '@/domain/budgets/budgetDraft';
 import { groupBudgets } from '@/domain/budgets/budgetFormat';
 import {
   fixedOverSalaryMessage,
@@ -110,6 +114,7 @@ export function Budgets() {
           mode="add"
           initialDraft={EMPTY_DRAFT}
           categories={groupBudgets(budgets).map((group) => group.category)}
+          categoryTypes={categoryTypes(budgets)}
           onSave={(fields) => {
             addBudget({ id: crypto.randomUUID(), ...fields });
             setDialog(null);
@@ -124,6 +129,7 @@ export function Budgets() {
           mode="edit"
           initialDraft={draftFromBudget(dialog.budget)}
           categories={groupBudgets(budgets).map((group) => group.category)}
+          categoryTypes={categoryTypes(budgets)}
           onSave={(fields) => {
             updateBudget({ id: dialog.budget.id, ...fields });
             setDialog(null);

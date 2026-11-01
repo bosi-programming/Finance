@@ -33,6 +33,14 @@ export function draftFromBudget(budget: Budget): BudgetDraft {
   };
 }
 
+export function categoryTypes(budgets: Budget[]): Record<string, BudgetType> {
+  const types: Record<string, BudgetType> = {};
+  for (const budget of budgets) {
+    types[budget.category] ??= budget.type;
+  }
+  return types;
+}
+
 export type BudgetDraftField = 'name' | 'type' | 'value' | 'category';
 export type BudgetDraftErrors = Partial<Record<BudgetDraftField, string>>;
 export type BudgetDraftResult =
@@ -58,7 +66,9 @@ export function validateBudgetDraft(draft: BudgetDraft): BudgetDraftResult {
     errors.name = BUDGET_NAME_REQUIRED_MESSAGE;
   }
   if (draft.type === '') {
-    errors.type = BUDGET_TYPE_REQUIRED_MESSAGE;
+    if (draft.addingCategory) {
+      errors.type = BUDGET_TYPE_REQUIRED_MESSAGE;
+    }
   } else {
     const parsed = parseBudgetValue(draft.type, draft.valueText);
     if (parsed.ok) {

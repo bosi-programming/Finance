@@ -5,6 +5,7 @@ import {
   BUDGET_NAME_REQUIRED_MESSAGE,
   BUDGET_TYPE_REQUIRED_MESSAGE,
   EMPTY_DRAFT,
+  categoryTypes,
   draftFromBudget,
   FIXED_VALUE_INVALID_MESSAGE,
   PERCENTAGE_VALUE_INVALID_MESSAGE,
@@ -49,8 +50,20 @@ describe('validateBudgetDraft', () => {
     });
   });
 
-  it('flags every empty field', () => {
+  it('flags the name and category of an empty draft', () => {
     expect(validateBudgetDraft(EMPTY_DRAFT)).toEqual({
+      ok: false,
+      errors: {
+        name: BUDGET_NAME_REQUIRED_MESSAGE,
+        category: BUDGET_CATEGORY_REQUIRED_MESSAGE,
+      },
+    });
+  });
+
+  it('flags the missing type only when adding a category', () => {
+    expect(
+      validateBudgetDraft({ ...EMPTY_DRAFT, addingCategory: true }),
+    ).toEqual({
       ok: false,
       errors: {
         name: BUDGET_NAME_REQUIRED_MESSAGE,
@@ -148,6 +161,21 @@ describe('draftFromBudget', () => {
       category: 'Leisure',
       addingCategory: false,
       newCategory: '',
+    });
+  });
+});
+
+describe('categoryTypes', () => {
+  it('maps each category to the type of its first budget', () => {
+    const budgets: Budget[] = [
+      { id: 'a', name: 'A', type: 'fixed', value: 1, category: 'Housing' },
+      { id: 'b', name: 'B', type: 'percentage', value: 1, category: 'Housing' },
+      { id: 'c', name: 'C', type: 'percentage', value: 1, category: 'Leisure' },
+    ];
+
+    expect(categoryTypes(budgets)).toEqual({
+      Housing: 'fixed',
+      Leisure: 'percentage',
     });
   });
 });
