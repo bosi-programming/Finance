@@ -293,6 +293,22 @@ describe('Result page', () => {
       expect(screen.getByRole('alert')).toHaveTextContent('Another message');
     });
 
+    it('closes the Toast on leaving result with the sum above 100', async () => {
+      useFinanceStore.setState({
+        salary: 5000,
+        budgets: [travel, overSavings],
+      });
+      const testRouter = await renderRoute('/result');
+      await screen.findByRole('alert');
+
+      await act(async () => {
+        await testRouter.navigate({ to: '/salary' });
+      });
+
+      expect(testRouter.state.location.pathname).toBe('/salary');
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
     it('keeps the Toast closed when nothing changes', async () => {
       const user = userEvent.setup();
       useFinanceStore.setState({
