@@ -228,6 +228,22 @@ describe('Result page', () => {
       );
     });
 
+    it('closes the Toast when budgets change to 100 or less', async () => {
+      useFinanceStore.setState({
+        salary: 5000,
+        budgets: [travel, overSavings],
+      });
+      await renderRoute('/result');
+      await screen.findByRole('alert');
+
+      act(() => {
+        useFinanceStore.setState({ budgets: [travel] });
+      });
+
+      await screen.findByRole('region', { name: 'Remaining' });
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
     it('keeps the Toast closed when nothing changes', async () => {
       const user = userEvent.setup();
       useFinanceStore.setState({

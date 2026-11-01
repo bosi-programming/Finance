@@ -57,9 +57,17 @@ function ResultPlan({ salary }: { salary: number }) {
   const result = allocateBudgets(salary, budgets);
 
   useEffect(() => {
-    if (isPercentageOver(budgets)) {
-      showToast(percentageOverMessage(percentageTotal(budgets)));
+    if (!isPercentageOver(budgets)) {
+      return;
     }
+    const message = percentageOverMessage(percentageTotal(budgets));
+    showToast(message);
+    return () => {
+      const { toast, clearToast } = useFinanceStore.getState();
+      if (toast === message) {
+        clearToast();
+      }
+    };
   }, [budgets, showToast]);
 
   return (
