@@ -4,10 +4,12 @@ import {
   createRouter,
 } from '@tanstack/react-router';
 import { render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { db } from '@/persistence/db';
 import { routeTree } from '@/router';
-import { useFinanceStore } from '@/store';
+import { STORAGE_FAILED_MESSAGE, useFinanceStore } from '@/store';
 import { resetPersistence } from '@/test/resetPersistence';
 import type { Budget } from '@/types/budget';
 
@@ -113,6 +115,169 @@ describe('Budgets page', () => {
       within(screen.getByRole('region', { name: 'Housing' })).getByText(
         '$2,000 · 10%',
       ),
+    ).toBeInTheDocument();
+  });
+  it('opens the add dialog', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+
+    await user.click(screen.getByRole('button', { name: 'Add budget' }));
+
+    const dialog = screen.getByRole('dialog', { name: 'Add budget' });
+    expect(within(dialog).getByRole('textbox', { name: 'Name' })).toHaveValue(
+      '',
+    );
+    expect(within(dialog).getByRole('textbox', { name: 'Value' })).toHaveValue(
+      '',
+    );
+  });
+
+  it('cancel closes the add dialog without changes', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    await user.click(screen.getByRole('button', { name: 'Add budget' }));
+    const dialog = screen.getByRole('dialog', { name: 'Add budget' });
+
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Name' }),
+      'Rent',
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(useFinanceStore.getState().budgets).toEqual([]);
+  });
+
+  it('Escape closes the add dialog without changes', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    await user.click(screen.getByRole('button', { name: 'Add budget' }));
+
+    await user.keyboard('{Escape}');
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(useFinanceStore.getState().budgets).toEqual([]);
+  });
+
+  it('adds the first budget with a new category', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    await user.click(screen.getByRole('button', { name: 'Add budget' }));
+    const dialog = screen.getByRole('dialog', { name: 'Add budget' });
+
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Name' }),
+      'Rent',
+    );
+    await user.click(within(dialog).getByRole('combobox', { name: 'Type' }));
+    await user.click(screen.getByRole('option', { name: 'Fixed' }));
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Value' }),
+      '2000',
+    );
+    await user.click(
+      within(dialog).getByRole('combobox', { name: 'Category' }),
+    );
+    await user.click(
+      screen.getByRole('option', { name: '+ Add new category' }),
+    );
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'New category' }),
+      'Housing',
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(useFinanceStore.getState().budgets).toEqual([
+      {
+        id: expect.any(String) as string,
+        name: 'Rent',
+        type: 'fixed',
+        value: 2000,
+        category: 'Housing',
+      },
+    ]);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(
+      within(screen.getByRole('region', { name: 'Housing' })).getByText('Rent'),
+    ).toBeInTheDocument();
+  });
+
+  it('adds a budget to an existing category', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+    await user.click(screen.getByRole('button', { name: 'Add budget' }));
+    const dialog = screen.getByRole('dialog', { name: 'Add budget' });
+
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Name' }),
+      'Fun',
+    );
+    await user.click(within(dialog).getByRole('combobox', { name: 'Type' }));
+    await user.click(screen.getByRole('option', { name: 'Percentage' }));
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Value' }),
+      '60',
+    );
+    await user.click(
+      within(dialog).getByRole('combobox', { name: 'Category' }),
+    );
+    await user.click(screen.getByRole('option', { name: 'Housing' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(useFinanceStore.getState().budgets).toHaveLength(2);
+    expect(
+      within(screen.getByRole('region', { name: 'Housing' })).getByText(
+        '$2,000 · 60%',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('offers the categories in use', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent, fun] });
+    await renderRoute('/budgets');
+    await user.click(screen.getByRole('button', { name: 'Add budget' }));
+    const dialog = screen.getByRole('dialog', { name: 'Add budget' });
+
+    await user.click(
+      within(dialog).getByRole('combobox', { name: 'Category' }),
+    );
+
+    expect(screen.getByRole('option', { name: 'Housing' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Leisure' })).toBeInTheDocument();
+  });
+
+  it('still adds the budget when saving fails', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(db.appState, 'put').mockRejectedValue(new Error('quota'));
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+    await user.click(screen.getByRole('button', { name: 'Add budget' }));
+    const dialog = screen.getByRole('dialog', { name: 'Add budget' });
+
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Name' }),
+      'Fun',
+    );
+    await user.click(within(dialog).getByRole('combobox', { name: 'Type' }));
+    await user.click(screen.getByRole('option', { name: 'Percentage' }));
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Value' }),
+      '60',
+    );
+    await user.click(
+      within(dialog).getByRole('combobox', { name: 'Category' }),
+    );
+    await user.click(screen.getByRole('option', { name: 'Housing' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      STORAGE_FAILED_MESSAGE,
+    );
+    expect(useFinanceStore.getState().budgets).toHaveLength(2);
+    expect(
+      within(screen.getByRole('region', { name: 'Housing' })).getByText('Fun'),
     ).toBeInTheDocument();
   });
 });
