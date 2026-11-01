@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
-import { Button, Input, Paper, Typography } from 'bosi-design-system/react';
+import { Button, Input, Typography } from 'bosi-design-system/react';
 import { useImportFile } from '@/components/useImportFile';
 import {
   formatSalary,
@@ -45,9 +45,9 @@ export function Salary() {
   };
 
   return (
-    <Paper className="flex w-full flex-col gap-8 md:w-[400px]">
+    <div className="flex w-full flex-col gap-4 md:w-[400px]">
       <div className="flex flex-col gap-2">
-        <Typography size="h1">
+        <Typography size="h1" color="primary">
           {hasSalary ? 'Your gross salary' : "What's your gross salary?"}
         </Typography>
         <Typography size="body">
@@ -95,6 +95,6 @@ export function Salary() {
           </Button>
         )}
       </div>
-    </Paper>
+    </div>
   );
 }
