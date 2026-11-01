@@ -22,15 +22,14 @@ export function parseMoney(text: string): MoneyParseResult {
 const CENTS_PER_UNIT = 100;
 
 export function formatMoney(value: number): string {
-  const isWhole = Number.isInteger(
-    Math.round(value * CENTS_PER_UNIT) / CENTS_PER_UNIT,
-  );
-  const digits = isWhole ? 0 : 2;
+  const rounded = Math.round(value * CENTS_PER_UNIT) / CENTS_PER_UNIT;
+  const digits = Number.isInteger(rounded) ? 0 : 2;
   const amount = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
-  }).format(value);
-  return `$${amount}`;
+  }).format(Math.abs(rounded));
+  const sign = rounded < 0 ? '-' : '';
+  return `${sign}$${amount}`;
 }
 
 const fixedFormatter = new Intl.NumberFormat('en-US', {
