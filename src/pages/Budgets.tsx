@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { Banner, Button, Paper, Typography } from 'bosi-design-system/react';
 
 import { BudgetFormModal } from '@/components/budgets/BudgetFormModal';
@@ -33,6 +34,7 @@ export function Budgets() {
   const deleteBudget = useFinanceStore((state) => state.deleteBudget);
   const salary = useFinanceStore((state) => state.salary);
   const showToast = useFinanceStore((state) => state.showToast);
+  const navigate = useNavigate();
   const [dialog, setDialog] = useState<BudgetDialog>(null);
   const hasBudgets = budgets.length > 0;
   const fixedTotal = getFixedBudgetsTotal(budgets);
@@ -43,6 +45,15 @@ export function Budgets() {
       showToast(percentageOverMessage(total));
     }
   }, [budgets, showToast]);
+
+  const handleSeeResult = () => {
+    const total = getTotalPercentage(budgets);
+    if (total > 100) {
+      showToast(percentageOverMessage(total));
+      return;
+    }
+    void navigate({ to: '/result' });
+  };
 
   return (
     <Paper className="flex w-full flex-col gap-8 md:w-[400px]">
@@ -73,6 +84,11 @@ export function Budgets() {
       >
         Add budget
       </Button>
+      {hasBudgets && (
+        <Button color="secondary" size="full-width" onClick={handleSeeResult}>
+          See result
+        </Button>
+      )}
       {dialog?.kind === 'add' && (
         <BudgetFormModal
           mode="add"

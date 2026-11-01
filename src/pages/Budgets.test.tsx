@@ -3,7 +3,7 @@ import {
   createMemoryHistory,
   createRouter,
 } from '@tanstack/react-router';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -47,6 +47,14 @@ const save: Budget = {
   type: 'percentage',
   value: 10,
   category: 'Housing',
+};
+
+const trips: Budget = {
+  id: 'trips-1',
+  name: 'Trips',
+  type: 'percentage',
+  value: 50,
+  category: 'Leisure',
 };
 
 async function renderRoute(path: string) {
@@ -789,5 +797,44 @@ describe('Budgets page', () => {
     await renderRoute('/budgets');
 
     expect(screen.queryByText(/Fixed budgets exceed/)).not.toBeInTheDocument();
+  });
+
+  it('See result goes to the result page', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent, fun] });
+    const testRouter = await renderRoute('/budgets');
+
+    await user.click(screen.getByRole('button', { name: 'See result' }));
+
+    await waitFor(() => {
+      expect(testRouter.state.location.pathname).toBe('/result');
+    });
+  });
+
+  it('See result goes on despite the fixed warning', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ salary: 1500, budgets: [rent] });
+    const testRouter = await renderRoute('/budgets');
+
+    await user.click(screen.getByRole('button', { name: 'See result' }));
+
+    await waitFor(() => {
+      expect(testRouter.state.location.pathname).toBe('/result');
+    });
+  });
+
+  it('See result stays when percentages exceed 100', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [fun, trips] });
+    const testRouter = await renderRoute('/budgets');
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'See result' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Percentages sum to 110% — must be 100% or less.',
+    );
+    expect(testRouter.state.location.pathname).toBe('/budgets');
   });
 });
