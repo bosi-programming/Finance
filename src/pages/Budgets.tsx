@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Banner, Button, Paper, Typography } from 'bosi-design-system/react';
 
@@ -9,13 +9,11 @@ import { draftFromBudget, EMPTY_DRAFT } from '@/domain/budgets/budgetDraft';
 import { groupBudgets } from '@/domain/budgets/budgetFormat';
 import {
   fixedOverSalaryMessage,
+  isPercentageOver,
   percentageOverMessage,
+  percentageTotal,
 } from '@/domain/budgets/planChecks';
-import {
-  getFixedBudgetsTotal,
-  getTotalPercentage,
-  useFinanceStore,
-} from '@/store';
+import { getFixedBudgetsTotal, useFinanceStore } from '@/store';
 import { type Budget } from '@/types/budget';
 
 type BudgetDialog =
@@ -39,17 +37,20 @@ export function Budgets() {
   const hasBudgets = budgets.length > 0;
   const fixedTotal = getFixedBudgetsTotal(budgets);
 
-  useEffect(() => {
-    const total = getTotalPercentage(budgets);
-    if (total > 100) {
-      showToast(percentageOverMessage(total));
+  const warnIfPercentageOver = useCallback(() => {
+    if (!isPercentageOver(budgets)) {
+      return false;
     }
+    showToast(percentageOverMessage(percentageTotal(budgets)));
+    return true;
   }, [budgets, showToast]);
 
+  useEffect(() => {
+    warnIfPercentageOver();
+  }, [warnIfPercentageOver]);
+
   const handleSeeResult = () => {
-    const total = getTotalPercentage(budgets);
-    if (total > 100) {
-      showToast(percentageOverMessage(total));
+    if (warnIfPercentageOver()) {
       return;
     }
     void navigate({ to: '/result' });

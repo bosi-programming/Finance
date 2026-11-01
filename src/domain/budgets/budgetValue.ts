@@ -4,7 +4,7 @@ import { type Budget, type BudgetType } from '@/types/budget';
 export type BudgetValueResult = { ok: true; value: number } | { ok: false };
 
 const PERCENTAGE_PATTERN = /^\d+(\.\d{1,2})?%?$/;
-const MAX_PERCENTAGE = 100;
+export const MAX_PERCENTAGE = 100;
 
 export function parseFixedValue(text: string): BudgetValueResult {
   const parsed = parseSalary(text);

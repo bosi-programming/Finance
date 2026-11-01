@@ -459,6 +459,62 @@ describe('Budgets page', () => {
     ).toBeInTheDocument();
   });
 
+  it('clears the value error on the next value edit', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+    await user.click(within(dialog).getByRole('combobox', { name: 'Type' }));
+    await user.click(screen.getByRole('option', { name: 'Fixed' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+    expect(
+      within(dialog).getByText(FIXED_VALUE_INVALID_MESSAGE),
+    ).toBeInTheDocument();
+
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Value' }),
+      '5',
+    );
+
+    expect(
+      within(dialog).queryByText(FIXED_VALUE_INVALID_MESSAGE),
+    ).not.toBeInTheDocument();
+  });
+
+  it('clears the category error on choosing a category', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    await user.click(
+      within(dialog).getByRole('combobox', { name: 'Category' }),
+    );
+    await user.click(screen.getByRole('option', { name: 'Housing' }));
+
+    expect(
+      within(dialog).queryByText(BUDGET_CATEGORY_REQUIRED_MESSAGE),
+    ).not.toBeInTheDocument();
+  });
+
+  it('clears the category error on adding a new category', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    await user.click(
+      within(dialog).getByRole('combobox', { name: 'Category' }),
+    );
+    await user.click(
+      screen.getByRole('option', { name: '+ Add new category' }),
+    );
+
+    expect(
+      within(dialog).queryByText(BUDGET_CATEGORY_REQUIRED_MESSAGE),
+    ).not.toBeInTheDocument();
+  });
+
   it('allows duplicate names', async () => {
     const user = userEvent.setup();
     useFinanceStore.setState({ budgets: [rent] });
@@ -826,6 +882,27 @@ describe('Budgets page', () => {
   it('See result goes to the result page', async () => {
     const user = userEvent.setup();
     useFinanceStore.setState({ budgets: [rent, fun] });
+    const testRouter = await renderRoute('/budgets');
+
+    await user.click(screen.getByRole('button', { name: 'See result' }));
+
+    await waitFor(() => {
+      expect(testRouter.state.location.pathname).toBe('/result');
+    });
+  });
+
+  it('See result goes on when percentages sum to 100 with float noise', async () => {
+    const user = userEvent.setup();
+    const percent = (id: string, value: number): Budget => ({
+      id,
+      name: id,
+      type: 'percentage',
+      value,
+      category: 'Plan',
+    });
+    useFinanceStore.setState({
+      budgets: [percent('a', 0.01), percent('b', 70.68), percent('c', 29.31)],
+    });
     const testRouter = await renderRoute('/budgets');
 
     await user.click(screen.getByRole('button', { name: 'See result' }));
