@@ -12,6 +12,12 @@ describe('percentageOverMessage', () => {
       'Percentages sum to 110% — must be 100% or less.',
     );
   });
+
+  it('shows a total just above 100 without rounding it to 100', () => {
+    expect(percentageOverMessage(100.004)).toBe(
+      'Percentages sum to 100.004% — must be 100% or less.',
+    );
+  });
 });
 
 describe('fixedOverSalaryMessage', () => {
@@ -35,6 +41,10 @@ describe('isPercentageOver', () => {
     expect(
       isPercentageOver([percent(0.01), percent(70.68), percent(29.31)]),
     ).toBe(false);
+  });
+
+  it('flags a sum above 100 by less than a rounding step', () => {
+    expect(isPercentageOver([percent(60), percent(40.004)])).toBe(true);
   });
 
   it('flags a sum above 100', () => {

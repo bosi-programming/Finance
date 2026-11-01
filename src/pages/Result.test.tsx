@@ -173,6 +173,24 @@ describe('Result page', () => {
       );
     });
 
+    it('shows the error Toast for an imported sum just above 100', async () => {
+      useFinanceStore.setState({ salary: 5000, budgets: [rent] });
+      await renderRoute('/result');
+
+      await userEvent.upload(
+        screen.getByLabelText('Import file'),
+        jsonFile({
+          version: 'v0',
+          salary: 5000,
+          budgets: [halfTravel, { ...savings, value: 50.004 }],
+        }),
+      );
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        'Percentages sum to 100.004% — must be 100% or less.',
+      );
+    });
+
     it('hides the breakdown on error', async () => {
       useFinanceStore.setState({
         salary: 5000,

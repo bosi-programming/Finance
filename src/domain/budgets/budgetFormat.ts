@@ -12,9 +12,12 @@ const TOTAL_SEPARATOR = ' · ';
 
 export { formatMoney };
 
-export function formatPercent(value: number): string {
+export function formatPercent(
+  value: number,
+  maximumFractionDigits = 2,
+): string {
   const amount = new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 2,
+    maximumFractionDigits,
   }).format(value);
   return `${amount}%`;
 }
