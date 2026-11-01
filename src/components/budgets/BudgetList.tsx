@@ -26,7 +26,7 @@ function BudgetGroupSection({
         <Typography size="h4" as="h2" id={headingId}>
           {group.category}
         </Typography>
-        <Typography size="details" as="p" className="md:w-[200px]">
+        <Typography size="details" as="p" className="text-right">
           {formatGroupTotal(group)}
         </Typography>
       </div>
