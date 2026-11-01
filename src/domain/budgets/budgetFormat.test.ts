@@ -49,6 +49,15 @@ describe('formatMoney', () => {
   });
 
   it.each([
+    [1.115, '$1.12'],
+    [-1.115, '-$1.12'],
+    [0.005, '$0.01'],
+    [-0.005, '-$0.01'],
+  ])('rounds the same way for either sign: %s', (value, text) => {
+    expect(formatMoney(value)).toBe(text);
+  });
+
+  it.each([
     [-500, '-$500'],
     [-1234.5, '-$1,234.50'],
   ])('writes negatives with the sign first: %s', (value, text) => {

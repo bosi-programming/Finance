@@ -21,8 +21,13 @@ export function parseMoney(text: string): MoneyParseResult {
 
 const CENTS_PER_UNIT = 100;
 
+export function roundToCents(value: number): number {
+  const rounded = Math.round(Math.abs(value) * CENTS_PER_UNIT) / CENTS_PER_UNIT;
+  return value < 0 && rounded > 0 ? -rounded : rounded;
+}
+
 export function formatMoney(value: number): string {
-  const rounded = Math.round(value * CENTS_PER_UNIT) / CENTS_PER_UNIT;
+  const rounded = roundToCents(value);
   const digits = Number.isInteger(rounded) ? 0 : 2;
   const amount = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: digits,

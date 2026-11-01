@@ -78,6 +78,14 @@ describe('allocateBudgets allocations', () => {
     expect(result.allocations[0]).toEqual({ ...rentBudget, amount: 2000 });
   });
 
+  it('rounds a negative allocation the same way as a positive one', () => {
+    const result = allocateBudgets(0, [
+      { ...rentBudget, value: 11.15 },
+      { ...travelBudget, value: 10 },
+    ]);
+    expect(result.allocations[1].amount).toBe(-1.12);
+  });
+
   it('reconciles allocations plus remaining to the salary to the penny', () => {
     const thirdBudget: Budget = {
       id: 'third-1',
