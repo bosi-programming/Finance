@@ -139,7 +139,9 @@ describe('Result page', () => {
       });
       await renderRoute('/result');
 
-      expect(within(region('Remaining')).getByText('-$500')).toBeInTheDocument();
+      expect(
+        within(region('Remaining')).getByText('-$500'),
+      ).toBeInTheDocument();
     });
   });
 
@@ -261,7 +263,9 @@ describe('Result page', () => {
       });
       await renderRoute('/result');
 
-      expect(within(budgetRow('Travel')).getByText('-$500')).toBeInTheDocument();
+      expect(
+        within(budgetRow('Travel')).getByText('-$500'),
+      ).toBeInTheDocument();
       expect(
         screen.getByRole('status').compareDocumentPosition(region('Hobbies')) &
           Node.DOCUMENT_POSITION_FOLLOWING,
