@@ -7,6 +7,13 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import {
+  BUDGET_CATEGORY_REQUIRED_MESSAGE,
+  BUDGET_NAME_REQUIRED_MESSAGE,
+  BUDGET_TYPE_REQUIRED_MESSAGE,
+  FIXED_VALUE_INVALID_MESSAGE,
+  PERCENTAGE_VALUE_INVALID_MESSAGE,
+} from '@/domain/budgets/budgetDraft';
 import { db } from '@/persistence/db';
 import { routeTree } from '@/router';
 import { STORAGE_FAILED_MESSAGE, useFinanceStore } from '@/store';
@@ -279,5 +286,167 @@ describe('Budgets page', () => {
     expect(
       within(screen.getByRole('region', { name: 'Housing' })).getByText('Fun'),
     ).toBeInTheDocument();
+  });
+
+  async function openAddDialog(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(screen.getByRole('button', { name: 'Add budget' }));
+    return screen.getByRole('dialog', { name: 'Add budget' });
+  }
+
+  async function pickType(
+    user: ReturnType<typeof userEvent.setup>,
+    dialog: HTMLElement,
+    option: 'Fixed' | 'Percentage',
+  ) {
+    await user.click(within(dialog).getByRole('combobox', { name: 'Type' }));
+    await user.click(screen.getByRole('option', { name: option }));
+  }
+
+  async function pickCategory(
+    user: ReturnType<typeof userEvent.setup>,
+    dialog: HTMLElement,
+    option: string,
+  ) {
+    await user.click(
+      within(dialog).getByRole('combobox', { name: 'Category' }),
+    );
+    await user.click(screen.getByRole('option', { name: option }));
+  }
+
+  it('shows every error on an empty save', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(
+      within(dialog).getByText(BUDGET_NAME_REQUIRED_MESSAGE),
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).getByText(BUDGET_TYPE_REQUIRED_MESSAGE),
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).getByText(BUDGET_CATEGORY_REQUIRED_MESSAGE),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('dialog', { name: 'Add budget' }),
+    ).toBeInTheDocument();
+    expect(useFinanceStore.getState().budgets).toEqual([]);
+  });
+
+  it('rejects a blank name', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+    const name = within(dialog).getByRole('textbox', { name: 'Name' });
+
+    await user.type(name, '   ');
+    await pickType(user, dialog, 'Fixed');
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Value' }),
+      '2000',
+    );
+    await pickCategory(user, dialog, '+ Add new category');
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'New category' }),
+      'Housing',
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(
+      within(dialog).getByText(BUDGET_NAME_REQUIRED_MESSAGE),
+    ).toBeInTheDocument();
+    expect(name).toHaveAttribute('aria-invalid', 'true');
+    expect(useFinanceStore.getState().budgets).toEqual([]);
+  });
+
+  it('rejects a fixed value of zero', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+
+    await pickType(user, dialog, 'Fixed');
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Value' }),
+      '0',
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(
+      within(dialog).getByText(FIXED_VALUE_INVALID_MESSAGE),
+    ).toBeInTheDocument();
+  });
+
+  it('rejects a percentage above 100', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+
+    await pickType(user, dialog, 'Percentage');
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Value' }),
+      '101',
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(
+      within(dialog).getByText(PERCENTAGE_VALUE_INVALID_MESSAGE),
+    ).toBeInTheDocument();
+  });
+
+  it('rejects an empty new category', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+
+    await pickCategory(user, dialog, '+ Add new category');
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(
+      within(dialog).getByText(BUDGET_CATEGORY_REQUIRED_MESSAGE),
+    ).toBeInTheDocument();
+  });
+
+  it("clears a field's error on its next edit", async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    await user.type(within(dialog).getByRole('textbox', { name: 'Name' }), 'R');
+
+    expect(
+      within(dialog).queryByText(BUDGET_NAME_REQUIRED_MESSAGE),
+    ).not.toBeInTheDocument();
+    expect(
+      within(dialog).getByText(BUDGET_TYPE_REQUIRED_MESSAGE),
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).getByText(BUDGET_CATEGORY_REQUIRED_MESSAGE),
+    ).toBeInTheDocument();
+  });
+
+  it('allows duplicate names', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Name' }),
+      'Rent',
+    );
+    await pickType(user, dialog, 'Fixed');
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Value' }),
+      '2000',
+    );
+    await pickCategory(user, dialog, 'Housing');
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    const budgets = useFinanceStore.getState().budgets;
+    expect(budgets).toHaveLength(2);
+    expect(budgets.map((budget) => budget.name)).toEqual(['Rent', 'Rent']);
   });
 });

@@ -3,6 +3,8 @@ import { Button, Input, Modal, Selector } from 'bosi-design-system/react';
 
 import {
   type BudgetDraft,
+  type BudgetDraftErrors,
+  type BudgetDraftField,
   validateBudgetDraft,
 } from '@/domain/budgets/budgetDraft';
 import { valuePlaceholder } from '@/domain/budgets/budgetValue';
@@ -30,15 +32,29 @@ export function BudgetFormModal({
   onCancel,
 }: BudgetFormModalProps) {
   const [draft, setDraft] = useState(initialDraft);
+  const [errors, setErrors] = useState<BudgetDraftErrors>({});
 
-  const update = (changes: Partial<BudgetDraft>) => {
+  const update = (
+    changes: Partial<BudgetDraft>,
+    clears: BudgetDraftField[],
+  ) => {
     setDraft((current) => ({ ...current, ...changes }));
+    setErrors((current) =>
+      Object.fromEntries(
+        Object.entries(current).filter(
+          ([field]) => !clears.includes(field as BudgetDraftField),
+        ),
+      ),
+    );
   };
 
   const save = () => {
     const result = validateBudgetDraft(draft);
     if (result.ok) {
+      setErrors({});
       onSave(result.fields);
+    } else {
+      setErrors(result.errors);
     }
   };
 
@@ -64,8 +80,9 @@ export function BudgetFormModal({
           label="Name"
           placeholder="Budget name"
           value={draft.name}
+          error={errors.name}
           setValue={(name) => {
-            update({ name });
+            update({ name }, ['name']);
           }}
         />
         <Selector
@@ -74,8 +91,9 @@ export function BudgetFormModal({
           placeholder="Select a type"
           options={TYPE_OPTIONS}
           value={draft.type}
+          error={errors.type}
           onChange={(event) => {
-            update({ type: event.target.value as BudgetType });
+            update({ type: event.target.value as BudgetType }, ['type']);
           }}
         />
         <Input
@@ -84,8 +102,9 @@ export function BudgetFormModal({
           type="text"
           placeholder={valuePlaceholder(draft.type)}
           value={draft.valueText}
+          error={errors.value}
           setValue={(valueText) => {
-            update({ valueText });
+            update({ valueText }, ['value']);
           }}
         />
         <Selector
@@ -97,11 +116,14 @@ export function BudgetFormModal({
             label: category,
           }))}
           value={draft.addingCategory ? '' : draft.category}
+          error={draft.addingCategory ? undefined : errors.category}
           onChange={(event) => {
-            update({ category: event.target.value, addingCategory: false });
+            update({ category: event.target.value, addingCategory: false }, [
+              'category',
+            ]);
           }}
           onAddNew={() => {
-            update({ addingCategory: true });
+            update({ addingCategory: true }, ['category']);
           }}
           addNewLabel="+ Add new category"
         />
@@ -111,8 +133,9 @@ export function BudgetFormModal({
             label="New category"
             placeholder="Category name"
             value={draft.newCategory}
+            error={errors.category}
             setValue={(newCategory) => {
-              update({ newCategory });
+              update({ newCategory }, ['category']);
             }}
           />
         )}
