@@ -1,12 +1,20 @@
-import { useState } from 'react';
-import { Button, Paper, Typography } from 'bosi-design-system/react';
+import { useEffect, useState } from 'react';
+import { Banner, Button, Paper, Typography } from 'bosi-design-system/react';
 
 import { BudgetFormModal } from '@/components/budgets/BudgetFormModal';
 import { BudgetList } from '@/components/budgets/BudgetList';
 import { DeleteBudgetModal } from '@/components/budgets/DeleteBudgetModal';
 import { draftFromBudget, EMPTY_DRAFT } from '@/domain/budgets/budgetDraft';
 import { groupBudgets } from '@/domain/budgets/budgetFormat';
-import { useFinanceStore } from '@/store';
+import {
+  fixedOverSalaryMessage,
+  percentageOverMessage,
+} from '@/domain/budgets/planChecks';
+import {
+  getFixedBudgetsTotal,
+  getTotalPercentage,
+  useFinanceStore,
+} from '@/store';
 import { type Budget } from '@/types/budget';
 
 type BudgetDialog =
@@ -23,13 +31,28 @@ export function Budgets() {
   const addBudget = useFinanceStore((state) => state.addBudget);
   const updateBudget = useFinanceStore((state) => state.updateBudget);
   const deleteBudget = useFinanceStore((state) => state.deleteBudget);
+  const salary = useFinanceStore((state) => state.salary);
+  const showToast = useFinanceStore((state) => state.showToast);
   const [dialog, setDialog] = useState<BudgetDialog>(null);
   const hasBudgets = budgets.length > 0;
+  const fixedTotal = getFixedBudgetsTotal(budgets);
+
+  useEffect(() => {
+    const total = getTotalPercentage(budgets);
+    if (total > 100) {
+      showToast(percentageOverMessage(total));
+    }
+  }, [budgets, showToast]);
 
   return (
     <Paper className="flex w-full flex-col gap-8 md:w-[400px]">
       <Typography size="h1">Your budgets</Typography>
       <Typography size="body">{hasBudgets ? LIST_HINT : EMPTY_HINT}</Typography>
+      {salary !== null && fixedTotal > salary && (
+        <Banner type="warning">
+          {fixedOverSalaryMessage(fixedTotal - salary)}
+        </Banner>
+      )}
       {hasBudgets && (
         <BudgetList
           budgets={budgets}

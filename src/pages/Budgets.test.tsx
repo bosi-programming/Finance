@@ -721,4 +721,73 @@ describe('Budgets page', () => {
     expect(useFinanceStore.getState().budgets).toEqual([]);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
+
+  it('shows the percentage alert on open', async () => {
+    useFinanceStore.setState({
+      budgets: [fun, { ...save, id: 'save-2', value: 50 }],
+    });
+    await renderRoute('/budgets');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Percentages sum to 110% — must be 100% or less.',
+    );
+  });
+
+  it('shows the alert when an add pushes the sum above 100', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [fun] });
+    await renderRoute('/budgets');
+    await user.click(screen.getByRole('button', { name: 'Add budget' }));
+    const dialog = screen.getByRole('dialog', { name: 'Add budget' });
+
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Name' }),
+      'Savings',
+    );
+    await user.click(within(dialog).getByRole('combobox', { name: 'Type' }));
+    await user.click(screen.getByRole('option', { name: 'Percentage' }));
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Value' }),
+      '50',
+    );
+    await user.click(
+      within(dialog).getByRole('combobox', { name: 'Category' }),
+    );
+    await user.click(screen.getByRole('option', { name: 'Leisure' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('110%');
+  });
+
+  it('shows no alert at 100', async () => {
+    useFinanceStore.setState({
+      budgets: [fun, { ...save, id: 'save-2', value: 40 }],
+    });
+    await renderRoute('/budgets');
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('warns when fixed budgets exceed the salary', async () => {
+    useFinanceStore.setState({ salary: 1500, budgets: [rent] });
+    await renderRoute('/budgets');
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Fixed budgets exceed your salary by $500.',
+    );
+  });
+
+  it('does not warn at or below the salary', async () => {
+    useFinanceStore.setState({ salary: 2000, budgets: [rent] });
+    await renderRoute('/budgets');
+
+    expect(screen.queryByText(/Fixed budgets exceed/)).not.toBeInTheDocument();
+  });
+
+  it('does not warn without a salary', async () => {
+    useFinanceStore.setState({ salary: null, budgets: [rent] });
+    await renderRoute('/budgets');
+
+    expect(screen.queryByText(/Fixed budgets exceed/)).not.toBeInTheDocument();
+  });
 });

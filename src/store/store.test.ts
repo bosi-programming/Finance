@@ -97,6 +97,14 @@ describe('useFinanceStore', () => {
     expect(result.current.salary).toBe(SALARY);
   });
 
+  it('showToast sets the toast', () => {
+    const { result } = renderHook(() => useFinanceStore());
+    act(() => {
+      result.current.showToast('x');
+    });
+    expect(useFinanceStore.getState().toast).toBe('x');
+  });
+
   it('appends budgets in order', () => {
     const { result } = renderHook(() => useFinanceStore());
     act(() => {

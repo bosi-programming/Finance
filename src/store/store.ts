@@ -34,6 +34,7 @@ interface State {
   updateBudget: (budget: Budget) => void;
   deleteBudget: (budgetId: string) => void;
   clearToast: () => void;
+  showToast: (message: string) => void;
   hydrate: (row: unknown) => void;
   replaceAll: (state: AppState) => Promise<boolean>;
   getNetSalary: () => number | null;
@@ -79,6 +80,9 @@ export const useFinanceStore = create<State>()((set, get) => {
     },
     clearToast: () => {
       set({ toast: null });
+    },
+    showToast: (message) => {
+      set({ toast: message });
     },
     hydrate: (row) => {
       const result = storedRowSchema.safeParse(row);
