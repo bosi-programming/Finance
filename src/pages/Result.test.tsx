@@ -100,6 +100,18 @@ describe('Result page', () => {
       ).toBeInTheDocument();
     });
 
+    it("shows each budget's details", async () => {
+      useFinanceStore.setState({ salary: 5000, budgets: [rent, travel] });
+      await renderRoute('/result');
+
+      expect(
+        within(budgetRow('Rent')).getByText('Fixed · $2,000 / month'),
+      ).toBeInTheDocument();
+      expect(
+        within(budgetRow('Travel')).getByText('Percentage · 60%'),
+      ).toBeInTheDocument();
+    });
+
     it('shows each category total', async () => {
       useFinanceStore.setState({ salary: 5000, budgets: [rent, power] });
       await renderRoute('/result');
