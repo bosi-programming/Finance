@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { roundToCents } from '@/domain/money';
 import type { Budget } from '@/types/budget';
 import { allocateBudgets } from './allocateBudgets';
 
@@ -85,6 +86,29 @@ describe('allocateBudgets allocations', () => {
     ]);
     expect(result.allocations[1].amount).toBe(-1.12);
   });
+
+  it.each([
+    [5000.05, [50, 50]],
+    [10, [33.33, 33.33, 33.34]],
+  ])(
+    'leaves no Remaining at a sum of 100 when salary %s does not split evenly',
+    (salary, values) => {
+      const result = allocateBudgets(
+        salary,
+        values.map((value, index) => ({
+          ...travelBudget,
+          id: `percent-${String(index)}`,
+          value,
+        })),
+      );
+      const allocated = result.allocations.reduce(
+        (sum, allocation) => sum + allocation.amount,
+        0,
+      );
+      expect(result.remaining).toBe(0);
+      expect(roundToCents(allocated)).toBe(salary);
+    },
+  );
 
   it('reconciles allocations plus remaining to the salary to the penny', () => {
     const thirdBudget: Budget = {

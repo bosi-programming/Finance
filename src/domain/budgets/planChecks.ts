@@ -19,6 +19,10 @@ export function percentageTotal(budgets: Budget[]): number {
   return Number(total.toFixed(PERCENT_NOISE_DIGITS));
 }
 
+export function isPercentageFull(budgets: Budget[]): boolean {
+  return percentageTotal(budgets) === MAX_PERCENTAGE;
+}
+
 export function isPercentageOver(budgets: Budget[]): boolean {
   return percentageTotal(budgets) > MAX_PERCENTAGE;
 }
