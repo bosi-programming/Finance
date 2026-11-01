@@ -449,4 +449,83 @@ describe('Budgets page', () => {
     expect(budgets).toHaveLength(2);
     expect(budgets.map((budget) => budget.name)).toEqual(['Rent', 'Rent']);
   });
+
+  it('swaps the value placeholder with the type', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+    const value = within(dialog).getByRole('textbox', { name: 'Value' });
+
+    await pickType(user, dialog, 'Fixed');
+    expect(value).toHaveAttribute('placeholder', '$ 0.00');
+
+    await pickType(user, dialog, 'Percentage');
+    expect(value).toHaveAttribute('placeholder', '0%');
+  });
+
+  it('keeps the value text on type change', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+    const value = within(dialog).getByRole('textbox', { name: 'Value' });
+
+    await pickType(user, dialog, 'Fixed');
+    await user.type(value, '50');
+    await pickType(user, dialog, 'Percentage');
+
+    expect(value).toHaveValue('50');
+  });
+
+  it('clears the value error on type change', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+
+    await pickType(user, dialog, 'Fixed');
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Value' }),
+      '0',
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+    expect(
+      within(dialog).getByText(FIXED_VALUE_INVALID_MESSAGE),
+    ).toBeInTheDocument();
+
+    await pickType(user, dialog, 'Percentage');
+
+    expect(
+      within(dialog).queryByText(FIXED_VALUE_INVALID_MESSAGE),
+    ).not.toBeInTheDocument();
+    expect(
+      within(dialog).queryByText(PERCENTAGE_VALUE_INVALID_MESSAGE),
+    ).not.toBeInTheDocument();
+  });
+
+  it('re-validates under the new type on save', async () => {
+    const user = userEvent.setup();
+    await renderRoute('/budgets');
+    const dialog = await openAddDialog(user);
+
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Name' }),
+      'Fun',
+    );
+    await pickType(user, dialog, 'Fixed');
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Value' }),
+      '150',
+    );
+    await pickType(user, dialog, 'Percentage');
+    await pickCategory(user, dialog, '+ Add new category');
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'New category' }),
+      'Leisure',
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(
+      within(dialog).getByText(PERCENTAGE_VALUE_INVALID_MESSAGE),
+    ).toBeInTheDocument();
+    expect(useFinanceStore.getState().budgets).toEqual([]);
+  });
 });

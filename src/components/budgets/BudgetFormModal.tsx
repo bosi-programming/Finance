@@ -93,7 +93,10 @@ export function BudgetFormModal({
           value={draft.type}
           error={errors.type}
           onChange={(event) => {
-            update({ type: event.target.value as BudgetType }, ['type']);
+            update({ type: event.target.value as BudgetType }, [
+              'type',
+              'value',
+            ]);
           }}
         />
         <Input
