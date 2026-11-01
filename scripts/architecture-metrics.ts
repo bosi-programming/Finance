@@ -32,7 +32,9 @@ type LcomResult = {
 };
 
 function loadCruiserOutput(): CruiserOutput {
-  return JSON.parse(readFileSync('.tmp/dependency-cruiser.json', 'utf8')) as CruiserOutput;
+  return JSON.parse(
+    readFileSync('.tmp/dependency-cruiser.json', 'utf8'),
+  ) as CruiserOutput;
 }
 
 function getSourceFiles(): SourceFile[] {
@@ -45,7 +47,11 @@ function getSourceFiles(): SourceFile[] {
 
 function calculateAbstractness(folderPath: string): number {
   const files = globSync(`${folderPath}/**/*.{ts,tsx}`, {
-    ignore: [`${folderPath}/**/*.test.*`, `${folderPath}/**/*.spec.*`, `${folderPath}/**/test/**/*`],
+    ignore: [
+      `${folderPath}/**/*.test.*`,
+      `${folderPath}/**/*.spec.*`,
+      `${folderPath}/**/test/**/*`,
+    ],
   });
 
   if (files.length === 0) return 0;
@@ -91,7 +97,9 @@ function rateDistance(d: number): string {
 
 function diagnoseCoupling(a: number, i: number, d: number): string {
   if (d < 0.4) return 'balanced';
-  return a + i < 1 ? 'too concrete/stable (zone of pain)' : 'too abstract/unstable (zone of uselessness)';
+  return a + i < 1
+    ? 'too concrete/stable (zone of pain)'
+    : 'too abstract/unstable (zone of uselessness)';
 }
 
 function rateLcom(value: number): string {
@@ -111,7 +119,11 @@ function isPascalCase(name: string | undefined): boolean {
 }
 
 function returnsJsx(node: FunctionDeclaration | ArrowFunction): boolean {
-  const jsxKinds = [SyntaxKind.JsxElement, SyntaxKind.JsxSelfClosingElement, SyntaxKind.JsxFragment];
+  const jsxKinds = [
+    SyntaxKind.JsxElement,
+    SyntaxKind.JsxSelfClosingElement,
+    SyntaxKind.JsxFragment,
+  ];
   return jsxKinds.some((kind) => node.getDescendantsOfKind(kind).length > 0);
 }
 
@@ -123,7 +135,10 @@ function getParameterNames(parameter: ParameterDeclaration): string[] {
   return [parameter.getName()];
 }
 
-function isHookCall(declaration: VariableDeclaration, hookName: string): boolean {
+function isHookCall(
+  declaration: VariableDeclaration,
+  hookName: string,
+): boolean {
   const initializer = declaration.getInitializer();
   if (!initializer?.isKind(SyntaxKind.CallExpression)) return false;
   const expression = initializer.asKind(SyntaxKind.CallExpression);
@@ -148,7 +163,10 @@ function getStatefulVariableNames(declaration: VariableDeclaration): string[] {
   return name ? [name] : [];
 }
 
-function getComponentFields(component: FunctionDeclaration | ArrowFunction, body: Block): string[] {
+function getComponentFields(
+  component: FunctionDeclaration | ArrowFunction,
+  body: Block,
+): string[] {
   const paramNames = component.getParameters().flatMap(getParameterNames);
 
   const statefulVariableNames = body
@@ -166,8 +184,18 @@ function getComponentFields(component: FunctionDeclaration | ArrowFunction, body
   return [...new Set([...paramNames, ...statefulVariableNames])];
 }
 
-function getComponentMethods(body: Block): ArrowFunction[] {
-  return body.getDescendantsOfKind(SyntaxKind.ArrowFunction);
+function getComponentMethods(body: Block, fields: string[]): ArrowFunction[] {
+  const methods = body.getDescendantsOfKind(SyntaxKind.ArrowFunction);
+  if (fields.length === 0) {
+    return methods;
+  }
+  return methods.filter((method) =>
+    fields.some((field) =>
+      method
+        .getDescendantsOfKind(SyntaxKind.Identifier)
+        .some((id) => id.getText() === field),
+    ),
+  );
 }
 
 function calculateComponentLcom96b(
@@ -179,14 +207,16 @@ function calculateComponentLcom96b(
   if (!body || !body.isKind(SyntaxKind.Block)) return null;
 
   const fields = getComponentFields(component, body);
-  const methods = getComponentMethods(body);
+  const methods = getComponentMethods(body, fields);
 
   if (fields.length < 2 || methods.length < 2) return null;
 
   let sumAccess = 0;
   for (const field of fields) {
     const accessCount = methods.filter((method) =>
-      method.getDescendantsOfKind(SyntaxKind.Identifier).some((id) => id.getText() === field),
+      method
+        .getDescendantsOfKind(SyntaxKind.Identifier)
+        .some((id) => id.getText() === field),
     ).length;
     sumAccess += accessCount;
   }
@@ -195,7 +225,10 @@ function calculateComponentLcom96b(
   return { folder, name, type: 'component', value };
 }
 
-function calculateClassLcom96b(classNode: ClassDeclaration, folder: string): LcomResult | null {
+function calculateClassLcom96b(
+  classNode: ClassDeclaration,
+  folder: string,
+): LcomResult | null {
   const fields = classNode
     .getProperties()
     .filter((property) => !property.isStatic())
@@ -215,13 +248,22 @@ function calculateClassLcom96b(classNode: ClassDeclaration, folder: string): Lco
     const accessCount = methods.filter((method) =>
       method
         .getDescendantsOfKind(SyntaxKind.PropertyAccessExpression)
-        .some((ref) => ref.getExpression().isKind(SyntaxKind.ThisKeyword) && ref.getName() === fieldName),
+        .some(
+          (ref) =>
+            ref.getExpression().isKind(SyntaxKind.ThisKeyword) &&
+            ref.getName() === fieldName,
+        ),
     ).length;
     sumAccess += accessCount;
   }
 
   const value = 1 - sumAccess / (fields.length * methods.length);
-  return { folder, name: classNode.getName() ?? '<anonymous>', type: 'class', value };
+  return {
+    folder,
+    name: classNode.getName() ?? '<anonymous>',
+    type: 'class',
+    value,
+  };
 }
 
 function collectLcomResults(): LcomResult[] {
@@ -237,7 +279,11 @@ function collectLcomResults(): LcomResult[] {
 
     for (const func of sourceFile.getFunctions()) {
       if (isPascalCase(func.getName()) && returnsJsx(func)) {
-        const result = calculateComponentLcom96b(func, folder, func.getName() ?? '<anonymous>');
+        const result = calculateComponentLcom96b(
+          func,
+          folder,
+          func.getName() ?? '<anonymous>',
+        );
         if (result) results.push(result);
       }
     }
@@ -264,9 +310,14 @@ function getFolderName(filePath: string): string {
   return parts.slice(0, -1).join('/') || 'src';
 }
 
-function aggregateLcomByFolder(
-  results: LcomResult[],
-): Array<{ folder: string; count: number; avg: string; max: string; rating: string; diagnosis: string }> {
+function aggregateLcomByFolder(results: LcomResult[]): Array<{
+  folder: string;
+  count: number;
+  avg: string;
+  max: string;
+  rating: string;
+  diagnosis: string;
+}> {
   const grouped = new Map<string, LcomResult[]>();
   for (const result of results) {
     const existing = grouped.get(result.folder) ?? [];
@@ -296,8 +347,10 @@ function runCouplingReport() {
 
   const rows = folders
     .filter((folder) => folder.name.startsWith('src'))
+    .filter((folder) => folder.name.replace(/^\//, '') !== 'src')
     .map((folder) => {
       const folderPath = folder.name.replace(/^\//, '');
+      const isLeaf = folder.moduleCount === 1 && folder.instability === 0;
       const a = calculateAbstractness(folderPath);
       const i = folder.instability;
       const d = Math.abs(a + i - 1);
@@ -307,8 +360,10 @@ function runCouplingReport() {
         a: a.toFixed(2),
         i: i.toFixed(2),
         d: d.toFixed(2),
-        rating: rateDistance(d),
-        diagnosis: diagnoseCoupling(a, i, d),
+        rating: isLeaf ? 'leaf' : rateDistance(d),
+        diagnosis: isLeaf
+          ? 'leaf module (no internal deps)'
+          : diagnoseCoupling(a, i, d),
       };
     });
 
