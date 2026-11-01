@@ -979,6 +979,19 @@ describe('Budgets page', () => {
     expect(screen.queryByText(/Fixed budgets exceed/)).not.toBeInTheDocument();
   });
 
+  it('does not warn when fixed equals the salary with float noise', async () => {
+    useFinanceStore.setState({
+      salary: 0.3,
+      budgets: [
+        { ...rent, value: 0.1 },
+        { ...rent, id: 'rent-2', value: 0.2 },
+      ],
+    });
+    await renderRoute('/budgets');
+
+    expect(screen.queryByText(/Fixed budgets exceed/)).not.toBeInTheDocument();
+  });
+
   it('does not warn without a salary', async () => {
     useFinanceStore.setState({ salary: null, budgets: [rent] });
     await renderRoute('/budgets');

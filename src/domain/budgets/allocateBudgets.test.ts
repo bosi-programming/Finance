@@ -209,6 +209,14 @@ describe('allocateBudgets warning flag', () => {
     expect(result.remaining).toBe(-500);
   });
 
+  it('leaves warning null when fixed total equals salary with float noise', () => {
+    const result = allocateBudgets(0.3, [
+      { ...rentBudget, value: 0.1 },
+      { ...rentBudget, id: 'rent-2', value: 0.2 },
+    ]);
+    expect(result.warning).toBeNull();
+  });
+
   it('leaves warning null when fixed total equals salary', () => {
     const result = allocateBudgets(2000, [rentBudget, travelBudget]);
     expect(result.warning).toBeNull();

@@ -1,4 +1,5 @@
 import {
+  isFixedOverSalary,
   isPercentageFull,
   isPercentageOver,
 } from '@/domain/budgets/planChecks';
@@ -65,7 +66,9 @@ export function allocateBudgets(
   }
 
   const error = isPercentageOver(budgets) ? ALLOCATION_ERROR_MESSAGE : null;
-  const warning = fixedTotal > salary ? ALLOCATION_WARNING_MESSAGE : null;
+  const warning = isFixedOverSalary(fixedTotal, salary)
+    ? ALLOCATION_WARNING_MESSAGE
+    : null;
 
   return {
     salary,

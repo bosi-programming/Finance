@@ -13,6 +13,7 @@ import {
 import { groupBudgets } from '@/domain/budgets/budgetFormat';
 import {
   fixedOverSalaryMessage,
+  isFixedOverSalary,
   isPercentageOver,
   percentageOverMessage,
   percentageTotal,
@@ -71,7 +72,7 @@ export function Budgets() {
           {hasBudgets ? LIST_HINT : EMPTY_HINT}
         </Typography>
       </div>
-      {salary !== null && fixedTotal > salary && (
+      {salary !== null && isFixedOverSalary(fixedTotal, salary) && (
         <Banner type="warning">
           {fixedOverSalaryMessage(fixedTotal - salary)}
         </Banner>
