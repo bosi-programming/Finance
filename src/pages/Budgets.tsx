@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { Banner, Button, Typography } from 'bosi-design-system/react';
+import { Banner, Button, Paper, Typography } from 'bosi-design-system/react';
 
 import { BudgetFormModal } from '@/components/budgets/BudgetFormModal';
 import { BudgetList } from '@/components/budgets/BudgetList';
@@ -56,9 +56,15 @@ export function Budgets() {
   };
 
   return (
-    <div className="flex w-full flex-col gap-8 md:max-w-[1008px]">
-      <Typography size="h1">Your budgets</Typography>
-      <Typography size="body">{hasBudgets ? LIST_HINT : EMPTY_HINT}</Typography>
+    <Paper className="border-0! p-0! shadow-none! flex w-full flex-col gap-8 md:max-w-[1008px] lg:mb-auto lg:mt-12">
+      <div className="flex flex-col gap-2">
+        <Typography size="h1" color="primary">
+          Your budgets
+        </Typography>
+        <Typography size="body" className="mb-0!">
+          {hasBudgets ? LIST_HINT : EMPTY_HINT}
+        </Typography>
+      </div>
       {salary !== null && fixedTotal > salary && (
         <Banner type="warning">
           {fixedOverSalaryMessage(fixedTotal - salary)}
@@ -75,20 +81,28 @@ export function Budgets() {
           }}
         />
       )}
-      <Button
-        color="primary"
-        size="full-width"
-        onClick={() => {
-          setDialog({ kind: 'add' });
-        }}
-      >
-        Add budget
-      </Button>
-      {hasBudgets && (
-        <Button color="secondary" size="full-width" onClick={handleSeeResult}>
-          See result
+      <div className="flex flex-col gap-2 md:flex-row md:justify-end">
+        <Button
+          color="primary"
+          size="full-width"
+          className="md:h-10.5! md:w-auto!"
+          onClick={() => {
+            setDialog({ kind: 'add' });
+          }}
+        >
+          Add budget
         </Button>
-      )}
+        {hasBudgets && (
+          <Button
+            color="secondary"
+            size="full-width"
+            className="md:h-10.5! md:w-auto!"
+            onClick={handleSeeResult}
+          >
+            See result
+          </Button>
+        )}
+      </div>
       {dialog?.kind === 'add' && (
         <BudgetFormModal
           mode="add"
@@ -132,6 +146,6 @@ export function Budgets() {
           }}
         />
       )}
-    </div>
+    </Paper>
   );
 }

@@ -76,7 +76,7 @@ export function BudgetList({
   onDelete: (budget: Budget) => void;
 }) {
   return (
-    <>
+    <div className="flex flex-col gap-4">
       {groupBudgets(budgets).map((group) => (
         <BudgetGroupSection
           key={group.category}
@@ -85,6 +85,6 @@ export function BudgetList({
           onDelete={onDelete}
         />
       ))}
-    </>
+    </div>
   );
 }
