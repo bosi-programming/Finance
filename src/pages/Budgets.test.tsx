@@ -626,4 +626,99 @@ describe('Budgets page', () => {
     expect(useFinanceStore.getState().budgets).toEqual([rent]);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
+
+  async function openDeleteDialog(
+    user: ReturnType<typeof userEvent.setup>,
+    name: string,
+  ) {
+    await user.click(screen.getByRole('button', { name: `Delete ${name}` }));
+    return screen.getByRole('dialog', { name: `Delete ${name}?` });
+  }
+
+  it('opens the delete confirm', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+
+    const dialog = await openDeleteDialog(user, 'Rent');
+
+    expect(
+      within(dialog).getByText("This can't be undone."),
+    ).toBeInTheDocument();
+    expect(
+      within(dialog)
+        .getAllByRole('button')
+        .map((button) => button.textContent),
+    ).toEqual(['Cancel', 'Delete']);
+  });
+
+  it('cancel keeps the budget', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+    const dialog = await openDeleteDialog(user, 'Rent');
+
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+
+    expect(useFinanceStore.getState().budgets).toEqual([rent]);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('Escape keeps the budget', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+    await openDeleteDialog(user, 'Rent');
+
+    await user.keyboard('{Escape}');
+
+    expect(useFinanceStore.getState().budgets).toEqual([rent]);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('deletes the budget', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent, fun] });
+    await renderRoute('/budgets');
+    const dialog = await openDeleteDialog(user, 'Rent');
+
+    await user.click(within(dialog).getByRole('button', { name: 'Delete' }));
+
+    expect(useFinanceStore.getState().budgets).toEqual([fun]);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('region', { name: 'Housing' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the empty state after the last delete', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+    const dialog = await openDeleteDialog(user, 'Rent');
+
+    await user.click(within(dialog).getByRole('button', { name: 'Delete' }));
+
+    expect(
+      screen.getByText(
+        'No budgets yet. Add your first one to split your salary.',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('deletes from the edit dialog', async () => {
+    const user = userEvent.setup();
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+    const editDialog = await openEditDialog(user, 'Rent');
+
+    await user.click(
+      within(editDialog).getByRole('button', { name: 'Delete' }),
+    );
+    const confirm = screen.getByRole('dialog', { name: 'Delete Rent?' });
+    await user.click(within(confirm).getByRole('button', { name: 'Delete' }));
+
+    expect(useFinanceStore.getState().budgets).toEqual([]);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
 });

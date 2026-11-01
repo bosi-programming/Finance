@@ -30,6 +30,7 @@ export function BudgetFormModal({
   categories,
   onSave,
   onCancel,
+  onDelete,
 }: BudgetFormModalProps) {
   const [draft, setDraft] = useState(initialDraft);
   const [errors, setErrors] = useState<BudgetDraftErrors>({});
@@ -65,6 +66,11 @@ export function BudgetFormModal({
       onClose={onCancel}
       actions={
         <>
+          {mode === 'edit' && onDelete && (
+            <Button action="error" onClick={onDelete}>
+              Delete
+            </Button>
+          )}
           <Button color="secondary" onClick={onCancel}>
             Cancel
           </Button>

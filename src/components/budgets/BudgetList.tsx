@@ -12,9 +12,11 @@ import { type Budget } from '@/types/budget';
 function BudgetGroupSection({
   group,
   onEdit,
+  onDelete,
 }: {
   group: BudgetGroup;
   onEdit: (budget: Budget) => void;
+  onDelete: (budget: Budget) => void;
 }) {
   const headingId = useId();
 
@@ -40,6 +42,13 @@ function BudgetGroupSection({
                 onEdit(budget);
               }}
             />
+            <IconButton
+              action="delete"
+              aria-label={`Delete ${budget.name}`}
+              onClick={() => {
+                onDelete(budget);
+              }}
+            />
           </li>
         ))}
       </ul>
@@ -50,9 +59,11 @@ function BudgetGroupSection({
 export function BudgetList({
   budgets,
   onEdit,
+  onDelete,
 }: {
   budgets: Budget[];
   onEdit: (budget: Budget) => void;
+  onDelete: (budget: Budget) => void;
 }) {
   return (
     <>
@@ -61,6 +72,7 @@ export function BudgetList({
           key={group.category}
           group={group}
           onEdit={onEdit}
+          onDelete={onDelete}
         />
       ))}
     </>

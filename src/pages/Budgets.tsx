@@ -3,6 +3,7 @@ import { Button, Paper, Typography } from 'bosi-design-system/react';
 
 import { BudgetFormModal } from '@/components/budgets/BudgetFormModal';
 import { BudgetList } from '@/components/budgets/BudgetList';
+import { DeleteBudgetModal } from '@/components/budgets/DeleteBudgetModal';
 import { draftFromBudget, EMPTY_DRAFT } from '@/domain/budgets/budgetDraft';
 import { groupBudgets } from '@/domain/budgets/budgetFormat';
 import { useFinanceStore } from '@/store';
@@ -21,6 +22,7 @@ export function Budgets() {
   const budgets = useFinanceStore((state) => state.budgets);
   const addBudget = useFinanceStore((state) => state.addBudget);
   const updateBudget = useFinanceStore((state) => state.updateBudget);
+  const deleteBudget = useFinanceStore((state) => state.deleteBudget);
   const [dialog, setDialog] = useState<BudgetDialog>(null);
   const hasBudgets = budgets.length > 0;
 
@@ -33,6 +35,9 @@ export function Budgets() {
           budgets={budgets}
           onEdit={(budget) => {
             setDialog({ kind: 'edit', budget });
+          }}
+          onDelete={(budget) => {
+            setDialog({ kind: 'delete', budget });
           }}
         />
       )}
@@ -66,6 +71,21 @@ export function Budgets() {
           categories={groupBudgets(budgets).map((group) => group.category)}
           onSave={(fields) => {
             updateBudget({ id: dialog.budget.id, ...fields });
+            setDialog(null);
+          }}
+          onDelete={() => {
+            setDialog({ kind: 'delete', budget: dialog.budget });
+          }}
+          onCancel={() => {
+            setDialog(null);
+          }}
+        />
+      )}
+      {dialog?.kind === 'delete' && (
+        <DeleteBudgetModal
+          budget={dialog.budget}
+          onConfirm={() => {
+            deleteBudget(dialog.budget.id);
             setDialog(null);
           }}
           onCancel={() => {
