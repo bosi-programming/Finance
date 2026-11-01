@@ -142,6 +142,10 @@ flowchart LR
   - CLI percentage categories (investments, leisure) map to percentage budgets with user-defined categories.
   - The user can re-categorize after import, through budget CRUD.
 - After import, the app redirects to `/result` if budgets are present, otherwise to `/budgets`.
+- A rejected file shows "Import failed. Your data was not changed." and the user stays on the route. `data-schema.md` lists what fails.
+- The app asks for no confirmation before it replaces data.
+- Choosing the same file again runs a second import. Cancelling the file dialog does nothing.
+- Current limit: `/salary` does not save a typed salary until BOS-16, so import is the only screen path that sets one. Until an import sets one, Export stays disabled.
 
 ## Redirect rules
 

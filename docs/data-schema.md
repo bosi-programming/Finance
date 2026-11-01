@@ -122,6 +122,25 @@ The exported file is exactly the `AppState` object:
 
 Importing JSON replaces the current `AppState` in memory and in IndexedDB. The file is written to IndexedDB first; if that fails, nothing changes and the app shows "Import failed. Your data was not changed." The export file is named `finance-fe-v0.json`.
 
+### Import validation
+
+`src/persistence/schema.ts` checks every file with `zod`. A file with a `version` key must be an `AppState`; any other object must be a CLI export.
+
+These files fail, with the same message, and change nothing:
+
+- Invalid JSON, or a value that is not an object.
+- Wrong types, missing fields or extra keys, at any level.
+- A `version` other than `v0`.
+- Negative or non-finite numbers.
+- An empty `id`, `name` or `category`.
+- Two budgets with the same `id`.
+- A CLI export with no `salary`, including `{}`.
+
+These files import, and the screens show their error or warning:
+
+- Percentage budgets above 100%.
+- Fixed budgets above the salary.
+
 ## CLI migration
 
 The app accepts a JSON export from the existing CLI tool. The CLI groups are mapped to fixed or percentage budgets with user-defined categories:
@@ -154,6 +173,11 @@ export interface LegacyCliExport {
 ```
 
 Each group value becomes one budget with a default category. The user can re-categorize after import, through budget CRUD.
+
+- `id` is `legacy-<field>`, such as `legacy-fixedInvestments`.
+- `name` equals the category.
+- A group present as `0` stays a budget. An absent group adds none.
+- `salary` is optional in the type but required on import.
 
 ## Remaining
 
