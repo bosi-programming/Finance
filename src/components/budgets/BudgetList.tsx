@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { IconButton, Typography } from 'bosi-design-system/react';
+import { IconButton, Paper, Typography } from 'bosi-design-system/react';
 
 import {
   budgetDetails,
@@ -22,33 +22,43 @@ function BudgetGroupSection({
 
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-2">
-      <Typography size="h2" id={headingId}>
-        {group.category}
-      </Typography>
-      <Typography size="details" as="p">
-        {formatGroupTotal(group)}
-      </Typography>
+      <div className="flex items-baseline justify-between gap-4">
+        <Typography size="h4" as="h2" id={headingId}>
+          {group.category}
+        </Typography>
+        <Typography size="details" as="p" className="md:w-[200px]">
+          {formatGroupTotal(group)}
+        </Typography>
+      </div>
       <ul className="flex flex-col gap-2">
         {group.budgets.map((budget) => (
           <li key={budget.id}>
-            <Typography size="body">{budget.name}</Typography>
-            <Typography size="details" as="p">
-              {budgetDetails(budget)}
-            </Typography>
-            <IconButton
-              action="edit"
-              aria-label={`Edit ${budget.name}`}
-              onClick={() => {
-                onEdit(budget);
-              }}
-            />
-            <IconButton
-              action="delete"
-              aria-label={`Delete ${budget.name}`}
-              onClick={() => {
-                onDelete(budget);
-              }}
-            />
+            <Paper className="flex items-center gap-4">
+              <div className="flex flex-1 flex-col md:flex-row md:items-center md:gap-6">
+                <Typography size="h3" color="primary" className="md:w-[240px]">
+                  {budget.name}
+                </Typography>
+                <Typography size="body" as="p" className="mb-0!">
+                  {budgetDetails(budget)}
+                </Typography>
+              </div>
+              <div className="flex gap-2">
+                <IconButton
+                  action="delete"
+                  aria-label={`Delete ${budget.name}`}
+                  onClick={() => {
+                    onDelete(budget);
+                  }}
+                />
+                <IconButton
+                  action="edit"
+                  aria-label={`Edit ${budget.name}`}
+                  onClick={() => {
+                    onEdit(budget);
+                  }}
+                />
+              </div>
+            </Paper>
           </li>
         ))}
       </ul>

@@ -122,6 +122,30 @@ describe('Budgets page', () => {
     expect(within(leisure).getByText('Percentage · 60%')).toBeInTheDocument();
   });
 
+  it('titles each budget card under its category heading', async () => {
+    useFinanceStore.setState({ budgets: [rent, fun] });
+    await renderRoute('/budgets');
+
+    const housing = screen.getByRole('region', { name: 'Housing' });
+    expect(
+      within(housing).getByRole('heading', { level: 2, name: 'Housing' }),
+    ).toBeInTheDocument();
+    expect(
+      within(housing).getByRole('heading', { level: 3, name: 'Rent' }),
+    ).toBeInTheDocument();
+  });
+
+  it('puts Delete before Edit on each budget card', async () => {
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+
+    const remove = screen.getByRole('button', { name: 'Delete Rent' });
+    const edit = screen.getByRole('button', { name: 'Edit Rent' });
+    expect(
+      remove.compareDocumentPosition(edit) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it('shows a mixed category total', async () => {
     useFinanceStore.setState({ budgets: [rent, save] });
     await renderRoute('/budgets');

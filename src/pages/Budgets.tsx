@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { Banner, Button, Paper, Typography } from 'bosi-design-system/react';
+import { Banner, Button, Typography } from 'bosi-design-system/react';
 
 import { BudgetFormModal } from '@/components/budgets/BudgetFormModal';
 import { BudgetList } from '@/components/budgets/BudgetList';
@@ -56,7 +56,7 @@ export function Budgets() {
   };
 
   return (
-    <Paper className="flex w-full flex-col gap-8 md:w-[400px]">
+    <div className="flex w-full flex-col gap-8 md:max-w-[1008px]">
       <Typography size="h1">Your budgets</Typography>
       <Typography size="body">{hasBudgets ? LIST_HINT : EMPTY_HINT}</Typography>
       {salary !== null && fixedTotal > salary && (
@@ -132,6 +132,6 @@ export function Budgets() {
           }}
         />
       )}
-    </Paper>
+    </div>
   );
 }
