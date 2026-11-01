@@ -1,4 +1,5 @@
 import { type Budget } from '@/types/budget';
+import { formatMoney } from '@/domain/money';
 
 export interface BudgetGroup {
   category: string;
@@ -8,19 +9,8 @@ export interface BudgetGroup {
 }
 
 const TOTAL_SEPARATOR = ' · ';
-const CENTS_PER_UNIT = 100;
 
-export function formatMoney(value: number): string {
-  const isWhole = Number.isInteger(
-    Math.round(value * CENTS_PER_UNIT) / CENTS_PER_UNIT,
-  );
-  const digits = isWhole ? 0 : 2;
-  const amount = new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  }).format(value);
-  return `$${amount}`;
-}
+export { formatMoney };
 
 export function formatPercent(value: number): string {
   const amount = new Intl.NumberFormat('en-US', {

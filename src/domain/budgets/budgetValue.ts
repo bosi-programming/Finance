@@ -1,4 +1,4 @@
-import { formatSalary, parseSalary } from '@/domain/salary/salaryAmount';
+import { formatMoneyFixed, parseMoney } from '@/domain/money';
 import { type Budget, type BudgetType } from '@/types/budget';
 
 export type BudgetValueResult = { ok: true; value: number } | { ok: false };
@@ -7,7 +7,7 @@ const PERCENTAGE_PATTERN = /^\d+(\.\d{1,2})?%?$/;
 export const MAX_PERCENTAGE = 100;
 
 export function parseFixedValue(text: string): BudgetValueResult {
-  const parsed = parseSalary(text);
+  const parsed = parseMoney(text);
   if (parsed.ok && parsed.value > 0) {
     return { ok: true, value: parsed.value };
   }
@@ -38,7 +38,7 @@ export function parseBudgetValue(
 export function formatValueInput(budget: Budget): string {
   return budget.type === 'percentage'
     ? `${String(budget.value)}%`
-    : formatSalary(budget.value);
+    : formatMoneyFixed(budget.value);
 }
 
 export function valuePlaceholder(type: BudgetType | ''): string {
