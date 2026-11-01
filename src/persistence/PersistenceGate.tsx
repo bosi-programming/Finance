@@ -2,6 +2,7 @@ import Dexie from 'dexie';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { type ReactNode, useEffect, useState } from 'react';
 import { isFresh, readCurrent } from '@/persistence/sync';
+import { storedRowSchema } from '@/persistence/schema';
 import { STORAGE_FAILED_MESSAGE, useFinanceStore } from '@/store';
 
 const PENDING = { status: 'pending' } as const;
@@ -26,7 +27,8 @@ export function PersistenceGate({ children }: { children: ReactNode }) {
     if (result.status === 'failed') {
       useFinanceStore.setState({ toast: STORAGE_FAILED_MESSAGE });
     } else if (isFresh(result)) {
-      useFinanceStore.getState().hydrate(result.row);
+      const parsed = storedRowSchema.safeParse(result.row);
+      useFinanceStore.getState().hydrate(parsed.success ? parsed.data : null);
     }
     setOpen(true);
   }, [result]);

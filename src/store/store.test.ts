@@ -291,19 +291,10 @@ describe('hydrate', () => {
     expect(useFinanceStore.getState().budgets).toEqual([rentBudget]);
   });
 
-  it('reads undefined as empty', () => {
+  it('reads null as empty', () => {
     useFinanceStore.setState({ salary: 5, budgets: [rentBudget] });
 
-    useFinanceStore.getState().hydrate(undefined);
-
-    expect(useFinanceStore.getState().salary).toBeNull();
-    expect(useFinanceStore.getState().budgets).toEqual([]);
-  });
-
-  it('reads a bad row as empty', () => {
-    useFinanceStore.setState({ salary: 5, budgets: [rentBudget] });
-
-    useFinanceStore.getState().hydrate({ version: 'v0', salary: 'x' });
+    useFinanceStore.getState().hydrate(null);
 
     expect(useFinanceStore.getState().salary).toBeNull();
     expect(useFinanceStore.getState().budgets).toEqual([]);
@@ -318,31 +309,6 @@ describe('hydrate', () => {
 
     expect(put).not.toHaveBeenCalled();
     expect(useFinanceStore.getState().toast).toBeNull();
-  });
-
-  it('leaves a bad row in place', async () => {
-    const bad = { version: 'v9' } as unknown as StoredRow;
-    await db.appState.put(bad, 'current');
-
-    useFinanceStore.getState().hydrate(bad);
-
-    expect(await storedRow()).toEqual(bad);
-  });
-
-  it('replaces a bad row on the next write', async () => {
-    const bad = { version: 'v9' } as unknown as StoredRow;
-    await db.appState.put(bad, 'current');
-    useFinanceStore.getState().hydrate(bad);
-
-    useFinanceStore.getState().setSalary(SALARY);
-
-    await vi.waitFor(async () => {
-      expect(await storedRow()).toEqual({
-        version: 'v0',
-        salary: SALARY,
-        budgets: [],
-      });
-    });
   });
 });
 

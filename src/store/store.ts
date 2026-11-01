@@ -1,10 +1,14 @@
-import { storedRowSchema } from '@/persistence/schema';
 import {
   getFixedBudgetsTotal,
   getNetSalary,
   getTotalPercentage,
 } from '@/domain/budgets/totals';
-import { SCHEMA_VERSION, type AppState, type Budget } from '@/types/budget';
+import {
+  SCHEMA_VERSION,
+  type AppState,
+  type Budget,
+  type StoredRow,
+} from '@/types/budget';
 import { type StoragePort } from '@/types/storage';
 import { create } from 'zustand';
 
@@ -33,7 +37,7 @@ interface State {
   deleteBudget: (budgetId: string) => void;
   clearToast: () => void;
   showToast: (message: string) => void;
-  hydrate: (row: unknown) => void;
+  hydrate: (row: StoredRow | null) => void;
   replaceAll: (state: AppState) => Promise<boolean>;
   getNetSalary: () => number | null;
   getTotalFixed: () => number;
@@ -83,12 +87,11 @@ export const useFinanceStore = create<State>()((set, get) => {
       set({ toast: message });
     },
     hydrate: (row) => {
-      const result = storedRowSchema.safeParse(row);
-      if (result.success) {
-        set({ salary: result.data.salary, budgets: result.data.budgets });
+      if (row === null) {
+        set({ salary: null, budgets: [] });
         return;
       }
-      set({ salary: null, budgets: [] });
+      set({ salary: row.salary, budgets: row.budgets });
     },
     replaceAll: async ({ salary, budgets }) => {
       const before = get();
