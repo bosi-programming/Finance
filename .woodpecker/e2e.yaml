@@ -1,0 +1,13 @@
+when:
+  - event: [push, manual]
+    branch: main
+
+steps:
+  - name: e2e
+    image: mcr.microsoft.com/playwright:v1.61.1-noble
+    environment:
+      SKIP_INSTALL_SIMPLE_GIT_HOOKS: '1'
+    commands:
+      - npm install -g pnpm@10.26.0
+      - pnpm install --frozen-lockfile
+      - pnpm test:e2e
