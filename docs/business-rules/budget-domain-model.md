@@ -8,7 +8,7 @@ Requirements-level diagrams for the budget allocation engine (ENG-5).
 flowchart TD
     A[Start] --> B[fixedTotal = sum of fixed values]
     B --> C[remainder = salary - fixedTotal]
-    C --> D[per percentage: allocation = round2 remainder x value/100]
+    C --> D[per percentage: allocation = roundToCents remainder x value/100]
     D --> E[percentageTotal = sum of allocations]
     E --> F[remaining = remainder - percentageTotal]
     F --> G[categoryTotals = sum of final amounts per category]

@@ -105,6 +105,9 @@ flowchart TD
 - Redirect guards:
   - no salary -> redirect to `/salary`;
   - no budgets -> redirect to `/budgets`.
+- These guards are not built yet (BOS-98). Until they are, `/result` stays reachable:
+  - no salary: the heading, the hint "Enter your salary to see your result." and an `Enter salary` CTA to `/salary`;
+  - salary and no budgets: the salary, `Remaining` equal to the salary and the CTA.
 - The screen shows:
   - salary;
   - budgets grouped by category;
@@ -113,6 +116,7 @@ flowchart TD
   - error Toast if percentage sum > 100%;
   - warning banner if fixed sum > salary.
 - With an error, the screen shows only the salary, the Toast, any warning banner and the CTA.
+- The error Toast shows when the page opens and again when budgets change while the sum stays above 100%. Once closed it stays closed until then. It also closes when the sum drops to 100% or less, and when the user leaves `/result`.
 - A CTA returns to `/budgets` to edit the plan.
 
 ## Navigation flow

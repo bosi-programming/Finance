@@ -28,15 +28,19 @@ This document defines how a salary and a set of budgets become a per-budget allo
   - a per-category total: sum of fixed amounts + percentage allocations inside that category;
   - a `remaining` line, whether positive, 0 or negative.
 - `remaining` is not assigned to any category; it is a separate line.
+- Each percentage allocation is rounded to cents.
+- When percentages sum to exactly 100%, the rounding leftover goes to the largest percentage budget (the first if tied), and `remaining` is 0, even with a negative remainder.
 
 ## Validation rules
 
 - **Error**: `sum(percentage percentages) > 100%`.
   - The plan is invalid. Percentage allocations cannot be computed as requested.
   - UI must show an error Toast and block the allocation preview.
+  - The sum is rounded to 8 decimal digits before the check, so float noise such as `0.01 + 70.68 + 29.31` is not an error and `100.004` is.
 - **Warning**: `fixedTotal > salary`.
   - Fixed budgets already exceed the salary; the remainder is negative.
   - UI must show a warning. Percentage allocations are computed as negative values, but the primary feedback is that fixed budgets are too high.
+  - Both values are compared in cents, so fixed budgets equal to the salary give no warning.
 - **Remaining**: `remaining > 0` when `sum(percentage percentages) < 100%`, and 0 when the sum is 100%.
   - These are valid states, not errors.
   - UI must display `remaining` as an explicit line in every state that shows the breakdown, as `$0` or `-$500` when it is 0 or negative.
@@ -73,7 +77,7 @@ Result:
 
 Result:
 
-- warning shown
+- warning shown: `Fixed budgets exceed the salary by $1,000.`
 - Housing: Rent 6000 -> total 6000
 - Hobbies: Travel -500 -> total -500
 - Remaining: -500
@@ -84,8 +88,8 @@ Result:
 - Fixed budgets: Rent 2000 (Housing)
 - Percentage budgets: Travel 60% (Hobbies), Savings 50% (Savings)
 - `sum(percentage percentages)` = 110% > 100% -> error.
-- UI shows error: percentage budgets cannot exceed 100%.
-- No allocation is computed.
+- UI shows error Toast: `Percentages sum to 110% — must be 100% or less.`
+- No allocation is shown. `allocateBudgets` still returns the amounts; the UI hides them when `error` is set.
 
 ## Impact on design
 
