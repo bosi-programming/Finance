@@ -1,7 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { type ChangeEvent, type RefObject, useRef } from 'react';
 import { parseImportFile } from '@/persistence/parseImportFile';
-import { IMPORT_FAILED_MESSAGE, useFinanceStore } from '@/store';
+import { importFailedMessage, useFinanceStore } from '@/store';
 
 export interface ImportFileControl {
   inputProps: {
@@ -35,7 +35,7 @@ export function useImportFile(inputLabel: string): ImportFileControl {
     const text = await readText(file);
     const state = text === null ? null : parseImportFile(text);
     if (state === null) {
-      useFinanceStore.setState({ toast: IMPORT_FAILED_MESSAGE });
+      useFinanceStore.setState({ toast: importFailedMessage() });
       return;
     }
     const replaced = await useFinanceStore.getState().replaceAll(state);

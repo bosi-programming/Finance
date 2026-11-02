@@ -2,12 +2,13 @@ import { renderHook } from '@testing-library/react';
 import { act } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { i18n } from '@/i18n';
 import { db } from '@/persistence/db';
 import { resetPersistence } from '@/test/resetPersistence';
 import { type Budget, type StoredRow } from '@/types/budget';
 import {
-  IMPORT_FAILED_MESSAGE,
-  STORAGE_FAILED_MESSAGE,
+  importFailedMessage,
+  storageFailedMessage,
   useFinanceStore,
 } from './store';
 
@@ -234,9 +235,22 @@ describe('store persistence', () => {
     useFinanceStore.getState().setSalary(SALARY);
 
     await vi.waitFor(() => {
-      expect(useFinanceStore.getState().toast).toBe(STORAGE_FAILED_MESSAGE);
+      expect(useFinanceStore.getState().toast).toBe(storageFailedMessage());
     });
     expect(useFinanceStore.getState().salary).toBe(SALARY);
+  });
+
+  it('writes the failure toast in the active language', async () => {
+    await i18n.changeLanguage('pt-BR');
+    vi.spyOn(db.appState, 'put').mockRejectedValue(new Error('write failed'));
+
+    useFinanceStore.getState().setSalary(SALARY);
+
+    await vi.waitFor(() => {
+      expect(useFinanceStore.getState().toast).toBe(
+        'Não foi possível salvar seus dados neste navegador.',
+      );
+    });
   });
 
   it('runs in memory with no storage', async () => {
@@ -248,7 +262,7 @@ describe('store persistence', () => {
     expect(useFinanceStore.getState().salary).toBe(SALARY);
     expect(useFinanceStore.getState().budgets).toEqual([rentBudget]);
     await vi.waitFor(() => {
-      expect(useFinanceStore.getState().toast).toBe(STORAGE_FAILED_MESSAGE);
+      expect(useFinanceStore.getState().toast).toBe(storageFailedMessage());
     });
   });
 
@@ -341,6 +355,6 @@ describe('replaceAll', () => {
     expect(ok).toBe(false);
     expect(useFinanceStore.getState().salary).toBe(1);
     expect(useFinanceStore.getState().budgets).toEqual([rentBudget]);
-    expect(useFinanceStore.getState().toast).toBe(IMPORT_FAILED_MESSAGE);
+    expect(useFinanceStore.getState().toast).toBe(importFailedMessage());
   });
 });

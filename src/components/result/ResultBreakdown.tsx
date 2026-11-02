@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { Paper, Typography } from 'bosi-design-system/react';
+import { useTranslation } from 'react-i18next';
 
 import { ResultAmountSection } from '@/components/result/ResultAmountSection';
 import {
@@ -8,10 +9,13 @@ import {
 } from '@/domain/budgets/allocationGroups';
 import { budgetDetails } from '@/domain/budgets/budgetFormat';
 import { formatMoney } from '@/domain/money';
+import { useLocaleSettings } from '@/i18n/useLocaleSettings';
 import { type BudgetAllocationItem } from '@/types/budget';
 
 function AllocationGroupSection({ group }: { group: AllocationGroup }) {
   const headingId = useId();
+  const { t } = useTranslation();
+  const settings = useLocaleSettings();
 
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-2">
@@ -20,7 +24,7 @@ function AllocationGroupSection({ group }: { group: AllocationGroup }) {
           {group.category}
         </Typography>
         <Typography size="details" as="p" className="text-right">
-          {formatMoney(group.total)}
+          {formatMoney(group.total, settings)}
         </Typography>
       </div>
       <ul className="flex flex-col gap-2">
@@ -32,11 +36,11 @@ function AllocationGroupSection({ group }: { group: AllocationGroup }) {
                   {allocation.name}
                 </Typography>
                 <Typography size="body" as="p" className="mb-0!">
-                  {budgetDetails(allocation)}
+                  {budgetDetails(allocation, t, settings)}
                 </Typography>
               </div>
               <Typography size="body" as="p" className="mb-0! text-right">
-                {formatMoney(allocation.amount)}
+                {formatMoney(allocation.amount, settings)}
               </Typography>
             </Paper>
           </li>
@@ -53,12 +57,14 @@ export function ResultBreakdown({
   allocations: BudgetAllocationItem[];
   remaining: number;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col gap-4">
       {groupAllocations(allocations).map((group) => (
         <AllocationGroupSection key={group.category} group={group} />
       ))}
-      <ResultAmountSection label="Remaining" amount={remaining} />
+      <ResultAmountSection label={t('result.remaining')} amount={remaining} />
     </div>
   );
 }

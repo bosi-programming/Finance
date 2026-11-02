@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Banner, Button, Paper, Typography } from 'bosi-design-system/react';
+import { useTranslation } from 'react-i18next';
 
 import { ResultAmountSection } from '@/components/result/ResultAmountSection';
 import { ResultBreakdown } from '@/components/result/ResultBreakdown';
@@ -11,13 +12,16 @@ import {
   percentageOverMessage,
   percentageTotal,
 } from '@/domain/budgets/planChecks';
+import { useLocaleSettings } from '@/i18n/useLocaleSettings';
 import { useFinanceStore } from '@/store';
 
 function ResultPage({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
+
   return (
     <Paper className="border-0! p-0! shadow-none! flex w-full flex-col gap-8 md:max-w-[1008px] lg:mb-auto lg:mt-12">
       <Typography size="h1" color="primary">
-        Result
+        {t('result.title')}
       </Typography>
       {children}
     </Paper>
@@ -44,6 +48,8 @@ function ResultCta({ label, to }: { label: string; to: '/budgets' }) {
 }
 
 function ResultPlan({ salary }: { salary: number }) {
+  const { t } = useTranslation();
+  const settings = useLocaleSettings();
   const budgets = useFinanceStore((state) => state.budgets);
   const showToast = useFinanceStore((state) => state.showToast);
   const result = allocateBudgets(salary, budgets);
@@ -52,7 +58,11 @@ function ResultPlan({ salary }: { salary: number }) {
     if (!isPercentageOver(budgets)) {
       return;
     }
-    const message = percentageOverMessage(percentageTotal(budgets));
+    const message = percentageOverMessage(
+      percentageTotal(budgets),
+      t,
+      settings,
+    );
     showToast(message);
     return () => {
       const { toast, clearToast } = useFinanceStore.getState();
@@ -60,14 +70,14 @@ function ResultPlan({ salary }: { salary: number }) {
         clearToast();
       }
     };
-  }, [budgets, showToast]);
+  }, [budgets, showToast, t, settings]);
 
   return (
     <ResultPage>
-      <ResultAmountSection label="Salary" amount={salary} />
+      <ResultAmountSection label={t('result.salary')} amount={salary} />
       {result.warning !== null && (
         <Banner type="warning">
-          {fixedOverSalaryMessage(result.fixedTotal - salary)}
+          {fixedOverSalaryMessage(result.fixedTotal - salary, t, settings)}
         </Banner>
       )}
       {result.error === null && (
@@ -76,7 +86,7 @@ function ResultPlan({ salary }: { salary: number }) {
           remaining={result.remaining}
         />
       )}
-      <ResultCta label="Edit budgets" to="/budgets" />
+      <ResultCta label={t('result.editBudgets')} to="/budgets" />
     </ResultPage>
   );
 }

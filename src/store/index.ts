@@ -1,6 +1,6 @@
 export {
   useFinanceStore,
   configureStorage,
-  STORAGE_FAILED_MESSAGE,
-  IMPORT_FAILED_MESSAGE,
+  storageFailedMessage,
+  importFailedMessage,
 } from './store.ts';

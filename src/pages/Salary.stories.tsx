@@ -7,6 +7,7 @@ import {
   createRouter,
 } from '@tanstack/react-router';
 
+import '@/i18n';
 import { useFinanceStore } from '@/store';
 import { Salary } from './Salary';
 

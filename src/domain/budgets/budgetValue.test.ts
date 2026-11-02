@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { LOCALE_SETTINGS } from '@/i18n/languages';
 import type { Budget } from '@/types/budget';
 
 import {
@@ -88,5 +89,36 @@ describe('valuePlaceholder', () => {
     expect(valuePlaceholder('')).toBe('$ 0.00');
     expect(valuePlaceholder('fixed')).toBe('$ 0.00');
     expect(valuePlaceholder('percentage')).toBe('0%');
+  });
+});
+
+describe('in pt-BR and es', () => {
+  const ptBR = LOCALE_SETTINGS['pt-BR'];
+  const es = LOCALE_SETTINGS.es;
+
+  it.each([
+    [ptBR, 'R$ 2.000,00', 2000],
+    [es, '89,90 €', 89.9],
+  ])('parses fixed values: %j %s', (settings, text, value) => {
+    expect(parseFixedValue(text, settings)).toEqual({ ok: true, value });
+  });
+
+  it.each([
+    [ptBR, '12,5%', 12.5],
+    [es, '12,25 %', 12.25],
+  ])('parses percentages: %j %s', (settings, text, value) => {
+    expect(parsePercentageValue(text, settings)).toEqual({ ok: true, value });
+  });
+
+  it('rejects the en decimal in pt-BR', () => {
+    expect(parsePercentageValue('12.5', ptBR)).toEqual({ ok: false });
+    expect(parseBudgetValue('fixed', '2,000.00', ptBR)).toEqual({ ok: false });
+  });
+
+  it('formats inputs and placeholders', () => {
+    expect(formatValueInput(rent, ptBR)).toBe('R$ 2.000,00');
+    expect(formatValueInput({ ...fun, value: 12.5 }, es)).toBe('12,5%');
+    expect(valuePlaceholder('fixed', es)).toBe('0,00 €');
+    expect(valuePlaceholder('percentage', ptBR)).toBe('0%');
   });
 });

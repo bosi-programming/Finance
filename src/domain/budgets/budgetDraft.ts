@@ -2,6 +2,7 @@ import {
   formatValueInput,
   parseBudgetValue,
 } from '@/domain/budgets/budgetValue';
+import { LOCALE_SETTINGS, type LocaleSettings } from '@/i18n/languages';
 import { type Budget, type BudgetType } from '@/types/budget';
 
 export interface BudgetDraft {
@@ -13,6 +14,8 @@ export interface BudgetDraft {
   newCategory: string;
 }
 
+const DEFAULT_SETTINGS = LOCALE_SETTINGS.en;
+
 export const EMPTY_DRAFT: BudgetDraft = {
   name: '',
   type: '',
@@ -22,11 +25,14 @@ export const EMPTY_DRAFT: BudgetDraft = {
   newCategory: '',
 };
 
-export function draftFromBudget(budget: Budget): BudgetDraft {
+export function draftFromBudget(
+  budget: Budget,
+  settings: LocaleSettings = DEFAULT_SETTINGS,
+): BudgetDraft {
   return {
     name: budget.name,
     type: budget.type,
-    valueText: formatValueInput(budget),
+    valueText: formatValueInput(budget, settings),
     category: budget.category,
     addingCategory: false,
     newCategory: '',
@@ -41,20 +47,31 @@ export function categoryTypes(budgets: Budget[]): Record<string, BudgetType> {
   return types;
 }
 
+export const BUDGET_NAME_REQUIRED_KEY = 'validation.budgetNameRequired';
+export const BUDGET_TYPE_REQUIRED_KEY = 'validation.budgetTypeRequired';
+export const FIXED_VALUE_INVALID_KEY = 'validation.fixedValueInvalid';
+export const PERCENTAGE_VALUE_INVALID_KEY = 'validation.percentageValueInvalid';
+export const BUDGET_CATEGORY_REQUIRED_KEY = 'validation.budgetCategoryRequired';
+
+export type BudgetDraftErrorKey =
+  | typeof BUDGET_NAME_REQUIRED_KEY
+  | typeof BUDGET_TYPE_REQUIRED_KEY
+  | typeof FIXED_VALUE_INVALID_KEY
+  | typeof PERCENTAGE_VALUE_INVALID_KEY
+  | typeof BUDGET_CATEGORY_REQUIRED_KEY;
+
 export type BudgetDraftField = 'name' | 'type' | 'value' | 'category';
-export type BudgetDraftErrors = Partial<Record<BudgetDraftField, string>>;
+export type BudgetDraftErrors = Partial<
+  Record<BudgetDraftField, BudgetDraftErrorKey>
+>;
 export type BudgetDraftResult =
   | { ok: true; fields: Omit<Budget, 'id'> }
   | { ok: false; errors: BudgetDraftErrors };
 
-export const BUDGET_NAME_REQUIRED_MESSAGE = 'Enter a budget name.';
-export const BUDGET_TYPE_REQUIRED_MESSAGE = 'Choose a budget type.';
-export const FIXED_VALUE_INVALID_MESSAGE = 'Enter an amount above $ 0.00.';
-export const PERCENTAGE_VALUE_INVALID_MESSAGE =
-  'Enter a percentage between 0 and 100.';
-export const BUDGET_CATEGORY_REQUIRED_MESSAGE = 'Choose a category.';
-
-export function validateBudgetDraft(draft: BudgetDraft): BudgetDraftResult {
+export function validateBudgetDraft(
+  draft: BudgetDraft,
+  settings: LocaleSettings = DEFAULT_SETTINGS,
+): BudgetDraftResult {
   const errors: BudgetDraftErrors = {};
   const name = draft.name.trim();
   const category = (
@@ -63,25 +80,25 @@ export function validateBudgetDraft(draft: BudgetDraft): BudgetDraftResult {
   let value = 0;
 
   if (name === '') {
-    errors.name = BUDGET_NAME_REQUIRED_MESSAGE;
+    errors.name = BUDGET_NAME_REQUIRED_KEY;
   }
   if (draft.type === '') {
     if (draft.addingCategory) {
-      errors.type = BUDGET_TYPE_REQUIRED_MESSAGE;
+      errors.type = BUDGET_TYPE_REQUIRED_KEY;
     }
   } else {
-    const parsed = parseBudgetValue(draft.type, draft.valueText);
+    const parsed = parseBudgetValue(draft.type, draft.valueText, settings);
     if (parsed.ok) {
       value = parsed.value;
     } else {
       errors.value =
         draft.type === 'percentage'
-          ? PERCENTAGE_VALUE_INVALID_MESSAGE
-          : FIXED_VALUE_INVALID_MESSAGE;
+          ? PERCENTAGE_VALUE_INVALID_KEY
+          : FIXED_VALUE_INVALID_KEY;
     }
   }
   if (category === '') {
-    errors.category = BUDGET_CATEGORY_REQUIRED_MESSAGE;
+    errors.category = BUDGET_CATEGORY_REQUIRED_KEY;
   }
 
   if (Object.keys(errors).length > 0 || draft.type === '') {

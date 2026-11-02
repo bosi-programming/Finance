@@ -1,16 +1,17 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  BUDGET_CATEGORY_REQUIRED_MESSAGE,
-  BUDGET_NAME_REQUIRED_MESSAGE,
-  BUDGET_TYPE_REQUIRED_MESSAGE,
+  BUDGET_CATEGORY_REQUIRED_KEY,
+  BUDGET_NAME_REQUIRED_KEY,
+  BUDGET_TYPE_REQUIRED_KEY,
   EMPTY_DRAFT,
   categoryTypes,
   draftFromBudget,
-  FIXED_VALUE_INVALID_MESSAGE,
-  PERCENTAGE_VALUE_INVALID_MESSAGE,
+  FIXED_VALUE_INVALID_KEY,
+  PERCENTAGE_VALUE_INVALID_KEY,
   validateBudgetDraft,
 } from './budgetDraft';
+import { LOCALE_SETTINGS } from '@/i18n/languages';
 import type { Budget } from '@/types/budget';
 
 describe('validateBudgetDraft', () => {
@@ -54,8 +55,8 @@ describe('validateBudgetDraft', () => {
     expect(validateBudgetDraft(EMPTY_DRAFT)).toEqual({
       ok: false,
       errors: {
-        name: BUDGET_NAME_REQUIRED_MESSAGE,
-        category: BUDGET_CATEGORY_REQUIRED_MESSAGE,
+        name: BUDGET_NAME_REQUIRED_KEY,
+        category: BUDGET_CATEGORY_REQUIRED_KEY,
       },
     });
   });
@@ -66,9 +67,9 @@ describe('validateBudgetDraft', () => {
     ).toEqual({
       ok: false,
       errors: {
-        name: BUDGET_NAME_REQUIRED_MESSAGE,
-        type: BUDGET_TYPE_REQUIRED_MESSAGE,
-        category: BUDGET_CATEGORY_REQUIRED_MESSAGE,
+        name: BUDGET_NAME_REQUIRED_KEY,
+        type: BUDGET_TYPE_REQUIRED_KEY,
+        category: BUDGET_CATEGORY_REQUIRED_KEY,
       },
     });
   });
@@ -82,7 +83,7 @@ describe('validateBudgetDraft', () => {
         valueText: '10',
         category: 'Housing',
       }),
-    ).toEqual({ ok: false, errors: { name: BUDGET_NAME_REQUIRED_MESSAGE } });
+    ).toEqual({ ok: false, errors: { name: BUDGET_NAME_REQUIRED_KEY } });
   });
 
   it('flags a bad fixed value', () => {
@@ -94,7 +95,7 @@ describe('validateBudgetDraft', () => {
         valueText: '0',
         category: 'Housing',
       }),
-    ).toEqual({ ok: false, errors: { value: FIXED_VALUE_INVALID_MESSAGE } });
+    ).toEqual({ ok: false, errors: { value: FIXED_VALUE_INVALID_KEY } });
   });
 
   it('flags a bad percentage value', () => {
@@ -108,7 +109,7 @@ describe('validateBudgetDraft', () => {
       }),
     ).toEqual({
       ok: false,
-      errors: { value: PERCENTAGE_VALUE_INVALID_MESSAGE },
+      errors: { value: PERCENTAGE_VALUE_INVALID_KEY },
     });
   });
 
@@ -124,7 +125,7 @@ describe('validateBudgetDraft', () => {
       }),
     ).toEqual({
       ok: false,
-      errors: { category: BUDGET_CATEGORY_REQUIRED_MESSAGE },
+      errors: { category: BUDGET_CATEGORY_REQUIRED_KEY },
     });
   });
 });
@@ -177,5 +178,56 @@ describe('categoryTypes', () => {
       Housing: 'fixed',
       Leisure: 'percentage',
     });
+  });
+});
+
+describe('error keys', () => {
+  it('returns translation keys', () => {
+    expect(
+      validateBudgetDraft({ ...EMPTY_DRAFT, addingCategory: true }),
+    ).toEqual({
+      ok: false,
+      errors: {
+        name: 'validation.budgetNameRequired',
+        type: 'validation.budgetTypeRequired',
+        category: 'validation.budgetCategoryRequired',
+      },
+    });
+  });
+});
+
+describe('in pt-BR', () => {
+  const ptBR = LOCALE_SETTINGS['pt-BR'];
+
+  it('parses the value in the locale', () => {
+    expect(
+      validateBudgetDraft(
+        {
+          ...EMPTY_DRAFT,
+          name: 'Aluguel',
+          type: 'fixed',
+          valueText: 'R$ 2.000,50',
+          category: 'Casa',
+        },
+        ptBR,
+      ),
+    ).toEqual({
+      ok: true,
+      fields: {
+        name: 'Aluguel',
+        type: 'fixed',
+        value: 2000.5,
+        category: 'Casa',
+      },
+    });
+  });
+
+  it('seeds the draft value in the locale', () => {
+    expect(
+      draftFromBudget(
+        { id: 'a', name: 'A', type: 'fixed', value: 2000, category: 'Casa' },
+        ptBR,
+      ).valueText,
+    ).toBe('R$ 2.000,00');
   });
 });

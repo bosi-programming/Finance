@@ -2,6 +2,7 @@ import { useId } from 'react';
 import { Paper, Typography } from 'bosi-design-system/react';
 
 import { formatMoney } from '@/domain/money';
+import { useLocaleSettings } from '@/i18n/useLocaleSettings';
 
 export function ResultAmountSection({
   label,
@@ -11,6 +12,7 @@ export function ResultAmountSection({
   amount: number;
 }) {
   const headingId = useId();
+  const settings = useLocaleSettings();
 
   return (
     <section aria-labelledby={headingId}>
@@ -24,7 +26,7 @@ export function ResultAmountSection({
           color="primary"
           className="mb-0! text-right"
         >
-          {formatMoney(amount)}
+          {formatMoney(amount, settings)}
         </Typography>
       </Paper>
     </section>

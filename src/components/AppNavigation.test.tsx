@@ -7,11 +7,12 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { i18n } from '@/i18n';
 import { db } from '@/persistence/db';
 import { routeTree } from '@/router';
 import {
-  IMPORT_FAILED_MESSAGE,
-  STORAGE_FAILED_MESSAGE,
+  importFailedMessage,
+  storageFailedMessage,
   useFinanceStore,
 } from '@/store';
 import { resetPersistence } from '@/test/resetPersistence';
@@ -327,7 +328,7 @@ describe('import', () => {
     );
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      IMPORT_FAILED_MESSAGE,
+      importFailedMessage(),
     );
     expect(useFinanceStore.getState().salary).toBe(1);
     expect(testRouter.state.location.pathname).toBe('/budgets');
@@ -349,7 +350,7 @@ describe('import', () => {
     );
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      IMPORT_FAILED_MESSAGE,
+      importFailedMessage(),
     );
     expect(useFinanceStore.getState().salary).toBe(1);
     expect(testRouter.state.location.pathname).toBe('/budgets');
@@ -367,7 +368,7 @@ describe('import', () => {
     );
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      IMPORT_FAILED_MESSAGE,
+      importFailedMessage(),
     );
     expect(useFinanceStore.getState().salary).toBe(1);
     expect(testRouter.state.location.pathname).toBe('/budgets');
@@ -408,19 +409,43 @@ describe('toast', () => {
   beforeEach(resetPersistence);
 
   it('shows the toast message in an alert', async () => {
-    useFinanceStore.setState({ toast: STORAGE_FAILED_MESSAGE });
+    useFinanceStore.setState({ toast: storageFailedMessage() });
 
     await renderRoute('/budgets');
 
-    expect(screen.getByRole('alert')).toHaveTextContent(STORAGE_FAILED_MESSAGE);
+    expect(screen.getByRole('alert')).toHaveTextContent(storageFailedMessage());
   });
 
   it('clears the toast from its close button', async () => {
-    useFinanceStore.setState({ toast: STORAGE_FAILED_MESSAGE });
+    useFinanceStore.setState({ toast: storageFailedMessage() });
     await renderRoute('/budgets');
 
     await userEvent.click(screen.getByRole('button', { name: 'Close' }));
 
     expect(useFinanceStore.getState().toast).toBeNull();
+  });
+});
+
+describe('navigation in pt-BR', () => {
+  beforeEach(async () => {
+    await resetPersistence();
+    await i18n.changeLanguage('pt-BR');
+  });
+
+  it('labels links, actions and the toast in Portuguese', async () => {
+    useFinanceStore.setState({ toast: storageFailedMessage() });
+
+    await renderRoute('/salary');
+
+    expect(screen.getByRole('link', { name: 'Salário' })).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Orçamentos' })).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Resultado' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Importar' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Exportar' })).toBeVisible();
+    expect(screen.getByLabelText('Importar arquivo')).toHaveAttribute('hidden');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Não foi possível salvar seus dados neste navegador.',
+    );
+    expect(screen.getByRole('button', { name: 'Fechar' })).toBeVisible();
   });
 });

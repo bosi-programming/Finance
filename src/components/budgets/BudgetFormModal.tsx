@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { Button, Input, Modal, Selector } from 'bosi-design-system/react';
+import { useTranslation } from 'react-i18next';
 
 import {
   type BudgetDraft,
+  type BudgetDraftErrorKey,
   type BudgetDraftErrors,
   type BudgetDraftField,
   validateBudgetDraft,
 } from '@/domain/budgets/budgetDraft';
 import { valuePlaceholder } from '@/domain/budgets/budgetValue';
+import { formatMoneyFixed } from '@/domain/money';
+import { useLocaleSettings } from '@/i18n/useLocaleSettings';
 import { type Budget, type BudgetType } from '@/types/budget';
 
 export interface BudgetFormModalProps {
@@ -22,11 +26,6 @@ export interface BudgetFormModalProps {
 
 const NEW_CATEGORY_ID = '__new-category__';
 
-const TYPE_OPTIONS = [
-  { id: 'fixed', label: 'Fixed' },
-  { id: 'percentage', label: 'Percentage' },
-];
-
 export function BudgetFormModal({
   mode,
   initialDraft,
@@ -36,6 +35,8 @@ export function BudgetFormModal({
   onCancel,
   onDelete,
 }: BudgetFormModalProps) {
+  const { t } = useTranslation();
+  const settings = useLocaleSettings();
   const [draft, setDraft] = useState(initialDraft);
   const [errors, setErrors] = useState<BudgetDraftErrors>({});
 
@@ -53,8 +54,18 @@ export function BudgetFormModal({
     );
   };
 
+  const typeOptions = [
+    { id: 'fixed', label: t('budgetForm.typeFixed') },
+    { id: 'percentage', label: t('budgetForm.typePercentage') },
+  ];
+
+  const message = (key: BudgetDraftErrorKey | undefined) =>
+    key === undefined
+      ? undefined
+      : t(key, { min: formatMoneyFixed(0, settings) });
+
   const save = () => {
-    const result = validateBudgetDraft(draft);
+    const result = validateBudgetDraft(draft, settings);
     if (result.ok) {
       setErrors({});
       onSave(result.fields);
@@ -66,20 +77,20 @@ export function BudgetFormModal({
   return (
     <Modal
       open
-      title={mode === 'add' ? 'Add budget' : 'Edit budget'}
+      title={t(mode === 'add' ? 'budgetForm.addTitle' : 'budgetForm.editTitle')}
       onClose={onCancel}
       actions={
         <>
           {mode === 'edit' && onDelete && (
             <Button action="error" onClick={onDelete}>
-              Delete
+              {t('common.delete')}
             </Button>
           )}
           <Button color="secondary" onClick={onCancel}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button color="primary" onClick={save}>
-            Save
+            {t('common.save')}
           </Button>
         </>
       }
@@ -87,29 +98,29 @@ export function BudgetFormModal({
       <div className="flex flex-col gap-4">
         <Input
           name="budget-name"
-          label="Name"
-          placeholder="Budget name"
+          label={t('budgetForm.nameLabel')}
+          placeholder={t('budgetForm.namePlaceholder')}
           value={draft.name}
-          error={errors.name}
+          error={message(errors.name)}
           setValue={(name) => {
             update({ name }, ['name']);
           }}
         />
         <Selector
           name="budget-category"
-          label="Category"
-          placeholder="Select a category"
+          label={t('budgetForm.categoryLabel')}
+          placeholder={t('budgetForm.categoryPlaceholder')}
           options={[
             ...categories.map((category) => ({
               id: category,
               label: category,
             })),
             ...(draft.addingCategory
-              ? [{ id: NEW_CATEGORY_ID, label: 'New category' }]
+              ? [{ id: NEW_CATEGORY_ID, label: t('budgetForm.newCategory') }]
               : []),
           ]}
           value={draft.addingCategory ? NEW_CATEGORY_ID : draft.category}
-          error={draft.addingCategory ? undefined : errors.category}
+          error={draft.addingCategory ? undefined : message(errors.category)}
           onChange={(event) => {
             const category = event.target.value;
             update(
@@ -128,27 +139,27 @@ export function BudgetFormModal({
               'value',
             ]);
           }}
-          addNewLabel="+ Add new category"
+          addNewLabel={t('budgetForm.addNewCategory')}
         />
         {draft.addingCategory && (
           <>
             <Input
               name="budget-new-category"
-              label="New category"
-              placeholder="Category name"
+              label={t('budgetForm.newCategory')}
+              placeholder={t('budgetForm.newCategoryPlaceholder')}
               value={draft.newCategory}
-              error={errors.category}
+              error={message(errors.category)}
               setValue={(newCategory) => {
                 update({ newCategory }, ['category']);
               }}
             />
             <Selector
               name="budget-type"
-              label="Type"
-              placeholder="Select a type"
-              options={TYPE_OPTIONS}
+              label={t('budgetForm.typeLabel')}
+              placeholder={t('budgetForm.typePlaceholder')}
+              options={typeOptions}
               value={draft.type}
-              error={errors.type}
+              error={message(errors.type)}
               onChange={(event) => {
                 update({ type: event.target.value as BudgetType }, [
                   'type',
@@ -160,11 +171,11 @@ export function BudgetFormModal({
         )}
         <Input
           name="budget-value"
-          label="Value"
+          label={t('budgetForm.valueLabel')}
           type="text"
-          placeholder={valuePlaceholder(draft.type)}
+          placeholder={valuePlaceholder(draft.type, settings)}
           value={draft.valueText}
-          error={errors.value}
+          error={message(errors.value)}
           setValue={(valueText) => {
             update({ valueText }, ['value']);
           }}

@@ -1,16 +1,33 @@
+import { type TFunction } from 'i18next';
+
 import { formatMoney, formatPercent } from '@/domain/budgets/budgetFormat';
 import { MAX_PERCENTAGE } from '@/domain/budgets/budgetValue';
 import { roundToCents } from '@/domain/money';
+import { LOCALE_SETTINGS, type LocaleSettings } from '@/i18n/languages';
 import { type Budget } from '@/types/budget';
 
 const PERCENT_NOISE_DIGITS = 8;
+const DEFAULT_SETTINGS = LOCALE_SETTINGS.en;
 
-export function percentageOverMessage(total: number): string {
-  return `Percentages sum to ${formatPercent(total, PERCENT_NOISE_DIGITS)} — must be 100% or less.`;
+export function percentageOverMessage(
+  total: number,
+  t: TFunction,
+  settings: LocaleSettings = DEFAULT_SETTINGS,
+): string {
+  return t('plan.percentageOver', {
+    total: formatPercent(total, PERCENT_NOISE_DIGITS, settings),
+    max: formatPercent(MAX_PERCENTAGE, 0, settings),
+  });
 }
 
-export function fixedOverSalaryMessage(excess: number): string {
-  return `Fixed budgets exceed the salary by ${formatMoney(excess)}.`;
+export function fixedOverSalaryMessage(
+  excess: number,
+  t: TFunction,
+  settings: LocaleSettings = DEFAULT_SETTINGS,
+): string {
+  return t('plan.fixedOverSalary', {
+    excess: formatMoney(excess, settings),
+  });
 }
 
 export function isFixedOverSalary(fixedTotal: number, salary: number): boolean {

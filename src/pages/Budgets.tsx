@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Banner, Button, Paper, Typography } from 'bosi-design-system/react';
+import { useTranslation } from 'react-i18next';
 
 import { BudgetFormModal } from '@/components/budgets/BudgetFormModal';
 import { BudgetList } from '@/components/budgets/BudgetList';
@@ -19,6 +20,7 @@ import {
   percentageTotal,
 } from '@/domain/budgets/planChecks';
 import { getFixedBudgetsTotal } from '@/domain/budgets/totals';
+import { useLocaleSettings } from '@/i18n/useLocaleSettings';
 import { useFinanceStore } from '@/store';
 import { type Budget } from '@/types/budget';
 
@@ -28,10 +30,9 @@ type BudgetDialog =
   | { kind: 'edit'; budget: Budget }
   | { kind: 'delete'; budget: Budget };
 
-const EMPTY_HINT = 'No budgets yet. Add your first one to split your salary.';
-const LIST_HINT = 'Add, edit, and delete fixed and percentage budgets.';
-
 export function Budgets() {
+  const { t } = useTranslation();
+  const settings = useLocaleSettings();
   const budgets = useFinanceStore((state) => state.budgets);
   const addBudget = useFinanceStore((state) => state.addBudget);
   const updateBudget = useFinanceStore((state) => state.updateBudget);
@@ -47,9 +48,9 @@ export function Budgets() {
     if (!isPercentageOver(budgets)) {
       return false;
     }
-    showToast(percentageOverMessage(percentageTotal(budgets)));
+    showToast(percentageOverMessage(percentageTotal(budgets), t, settings));
     return true;
-  }, [budgets, showToast]);
+  }, [budgets, showToast, t, settings]);
 
   useEffect(() => {
     warnIfPercentageOver();
@@ -66,15 +67,15 @@ export function Budgets() {
     <Paper className="border-0! p-0! shadow-none! flex w-full flex-col gap-8 md:max-w-[1008px] lg:mb-auto lg:mt-12">
       <div className="flex flex-col gap-2">
         <Typography size="h1" color="primary">
-          Your budgets
+          {t('budgets.title')}
         </Typography>
         <Typography size="body" className="mb-0!">
-          {hasBudgets ? LIST_HINT : EMPTY_HINT}
+          {hasBudgets ? t('budgets.listHint') : t('budgets.emptyHint')}
         </Typography>
       </div>
       {salary !== null && isFixedOverSalary(fixedTotal, salary) && (
         <Banner type="warning">
-          {fixedOverSalaryMessage(fixedTotal - salary)}
+          {fixedOverSalaryMessage(fixedTotal - salary, t, settings)}
         </Banner>
       )}
       {hasBudgets && (
@@ -97,7 +98,7 @@ export function Budgets() {
             setDialog({ kind: 'add' });
           }}
         >
-          Add budget
+          {t('budgets.add')}
         </Button>
         {hasBudgets && (
           <Button
@@ -106,7 +107,7 @@ export function Budgets() {
             className="md:h-10.5! md:w-auto!"
             onClick={handleSeeResult}
           >
-            See result
+            {t('common.seeResult')}
           </Button>
         )}
       </div>
@@ -128,7 +129,7 @@ export function Budgets() {
       {dialog?.kind === 'edit' && (
         <BudgetFormModal
           mode="edit"
-          initialDraft={draftFromBudget(dialog.budget)}
+          initialDraft={draftFromBudget(dialog.budget, settings)}
           categories={groupBudgets(budgets).map((group) => group.category)}
           categoryTypes={categoryTypes(budgets)}
           onSave={(fields) => {

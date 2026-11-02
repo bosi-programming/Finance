@@ -3,7 +3,7 @@ import Dexie from 'dexie';
 import { StrictMode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { STORAGE_FAILED_MESSAGE, useFinanceStore } from '@/store';
+import { storageFailedMessage, useFinanceStore } from '@/store';
 import { resetPersistence } from '@/test/resetPersistence';
 import { db } from '@/persistence/db';
 import { persist } from '@/persistence/sync';
@@ -117,7 +117,7 @@ describe('PersistenceGate storage unavailable', () => {
 
     expect(screen.getByText('child salary=null budgets=0')).toBeVisible();
     await waitFor(() => {
-      expect(useFinanceStore.getState().toast).toBe(STORAGE_FAILED_MESSAGE);
+      expect(useFinanceStore.getState().toast).toBe(storageFailedMessage());
     });
   });
 
@@ -132,7 +132,7 @@ describe('PersistenceGate storage unavailable', () => {
 
     expect(await screen.findByText(/child salary/)).toBeVisible();
     await waitFor(() => {
-      expect(useFinanceStore.getState().toast).toBe(STORAGE_FAILED_MESSAGE);
+      expect(useFinanceStore.getState().toast).toBe(storageFailedMessage());
     });
   });
 

@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import '@/i18n';
 import { PersistenceGate } from '@/persistence/PersistenceGate';
 import { persist } from '@/persistence/sync';
 import { configureStorage } from '@/store';

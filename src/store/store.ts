@@ -9,13 +9,12 @@ import {
   type Budget,
   type StoredRow,
 } from '@/types/budget';
+import { i18n } from '@/i18n';
 import { type StoragePort } from '@/types/storage';
 import { create } from 'zustand';
 
-export const STORAGE_FAILED_MESSAGE =
-  'Your data could not be saved in this browser.';
-export const IMPORT_FAILED_MESSAGE =
-  'Import failed. Your data was not changed.';
+export const storageFailedMessage = () => i18n.t('toast.storageFailed');
+export const importFailedMessage = () => i18n.t('toast.importFailed');
 
 const noopStorage: StoragePort = {
   persist: async () => {},
@@ -48,7 +47,7 @@ export const useFinanceStore = create<State>()((set, get) => {
   const saveCurrent = () => {
     const { salary, budgets } = get();
     storage.persist({ version: SCHEMA_VERSION, salary, budgets }).catch(() => {
-      set({ toast: STORAGE_FAILED_MESSAGE });
+      set({ toast: storageFailedMessage() });
     });
   };
 
@@ -98,7 +97,7 @@ export const useFinanceStore = create<State>()((set, get) => {
       try {
         await storage.persist({ version: SCHEMA_VERSION, salary, budgets });
       } catch {
-        set({ toast: IMPORT_FAILED_MESSAGE });
+        set({ toast: importFailedMessage() });
         return false;
       }
       const after = get();

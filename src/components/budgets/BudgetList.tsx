@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { IconButton, Paper, Typography } from 'bosi-design-system/react';
+import { useTranslation } from 'react-i18next';
 
 import {
   budgetDetails,
@@ -7,6 +8,7 @@ import {
   groupBudgets,
   type BudgetGroup,
 } from '@/domain/budgets/budgetFormat';
+import { useLocaleSettings } from '@/i18n/useLocaleSettings';
 import { type Budget } from '@/types/budget';
 
 function BudgetGroupSection({
@@ -19,6 +21,8 @@ function BudgetGroupSection({
   onDelete: (budget: Budget) => void;
 }) {
   const headingId = useId();
+  const { t } = useTranslation();
+  const settings = useLocaleSettings();
 
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-2">
@@ -27,7 +31,7 @@ function BudgetGroupSection({
           {group.category}
         </Typography>
         <Typography size="details" as="p" className="text-right">
-          {formatGroupTotal(group)}
+          {formatGroupTotal(group, settings)}
         </Typography>
       </div>
       <ul className="flex flex-col gap-2">
@@ -39,20 +43,20 @@ function BudgetGroupSection({
                   {budget.name}
                 </Typography>
                 <Typography size="body" as="p" className="mb-0!">
-                  {budgetDetails(budget)}
+                  {budgetDetails(budget, t, settings)}
                 </Typography>
               </div>
               <div className="flex gap-2">
                 <IconButton
                   action="delete"
-                  aria-label={`Delete ${budget.name}`}
+                  aria-label={t('budgets.deleteNamed', { name: budget.name })}
                   onClick={() => {
                     onDelete(budget);
                   }}
                 />
                 <IconButton
                   action="edit"
-                  aria-label={`Edit ${budget.name}`}
+                  aria-label={t('budgets.editNamed', { name: budget.name })}
                   onClick={() => {
                     onEdit(budget);
                   }}

@@ -7,13 +7,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  SALARY_INVALID_MESSAGE,
-  SALARY_REQUIRED_MESSAGE,
-} from '@/domain/salary/salaryAmount';
+import { i18n } from '@/i18n';
 import { db } from '@/persistence/db';
 import { routeTree } from '@/router';
-import { STORAGE_FAILED_MESSAGE, useFinanceStore } from '@/store';
+import { storageFailedMessage, useFinanceStore } from '@/store';
 import { resetPersistence } from '@/test/resetPersistence';
 
 const rent = {
@@ -136,8 +133,12 @@ describe('Salary page', () => {
     await userEvent.tab();
 
     expect(field()).toHaveValue('abc');
-    expect(screen.queryByText(SALARY_INVALID_MESSAGE)).not.toBeInTheDocument();
-    expect(screen.queryByText(SALARY_REQUIRED_MESSAGE)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Enter an amount of $ 0.00 or more.'),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Enter your gross salary.'),
+    ).not.toBeInTheDocument();
   });
 
   it('saves the salary and goes to budgets', async () => {
@@ -171,7 +172,7 @@ describe('Salary page', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
 
-    expect(screen.getByText(SALARY_REQUIRED_MESSAGE)).toBeInTheDocument();
+    expect(screen.getByText('Enter your gross salary.')).toBeInTheDocument();
     expect(field()).toHaveAttribute('aria-invalid', 'true');
     expect(useFinanceStore.getState().salary).toBeNull();
     expect(testRouter.state.location.pathname).toBe('/salary');
@@ -185,7 +186,9 @@ describe('Salary page', () => {
     await userEvent.type(field(), '-1');
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
 
-    expect(screen.getByText(SALARY_INVALID_MESSAGE)).toBeInTheDocument();
+    expect(
+      screen.getByText('Enter an amount of $ 0.00 or more.'),
+    ).toBeInTheDocument();
     expect(useFinanceStore.getState().salary).toBe(3000);
     expect(testRouter.state.location.pathname).toBe('/salary');
   });
@@ -194,10 +197,12 @@ describe('Salary page', () => {
     await renderRoute('/salary');
 
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
-    expect(screen.getByText(SALARY_REQUIRED_MESSAGE)).toBeInTheDocument();
+    expect(screen.getByText('Enter your gross salary.')).toBeInTheDocument();
     await userEvent.type(field(), '1');
 
-    expect(screen.queryByText(SALARY_REQUIRED_MESSAGE)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Enter your gross salary.'),
+    ).not.toBeInTheDocument();
   });
 
   it('shows See result with a salary and budgets', async () => {
@@ -268,7 +273,7 @@ describe('Salary page', () => {
       expect(testRouter.state.location.pathname).toBe('/budgets');
     });
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      STORAGE_FAILED_MESSAGE,
+      storageFailedMessage(),
     );
   });
 
@@ -279,5 +284,57 @@ describe('Salary page', () => {
 
     expect(useFinanceStore.getState().salary).toBeNull();
     expect(testRouter.state.location.pathname).toBe('/salary');
+  });
+});
+
+describe('Salary page in pt-BR', () => {
+  beforeEach(async () => {
+    await resetPersistence();
+    await i18n.changeLanguage('pt-BR');
+  });
+
+  it('shows the copy and saves a pt-BR amount', async () => {
+    const testRouter = await renderRoute('/salary');
+
+    expect(
+      screen.getByRole('heading', {
+        level: 1,
+        name: 'Qual é o seu salário bruto?',
+      }),
+    ).toBeInTheDocument();
+    const input = screen.getByRole('textbox', { name: 'Salário bruto' });
+    expect(screen.getByPlaceholderText('R$ 0,00')).toBe(input);
+
+    await userEvent.type(input, '5.000,50');
+    await userEvent.click(screen.getByRole('button', { name: 'Continuar' }));
+
+    expect(useFinanceStore.getState().salary).toBe(5000.5);
+    await waitFor(() => {
+      expect(testRouter.state.location.pathname).toBe('/budgets');
+    });
+  });
+
+  it('shows the error with the local amount', async () => {
+    await renderRoute('/salary');
+
+    await userEvent.type(
+      screen.getByRole('textbox', { name: 'Salário bruto' }),
+      '5,000.50',
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Continuar' }));
+
+    expect(
+      screen.getByText('Informe um valor de R$ 0,00 ou mais.'),
+    ).toBeInTheDocument();
+  });
+
+  it('shows a saved salary in the local format', async () => {
+    useFinanceStore.setState({ salary: 1234.5 });
+
+    await renderRoute('/salary');
+
+    expect(screen.getByRole('textbox', { name: 'Salário bruto' })).toHaveValue(
+      'R$ 1.234,50',
+    );
   });
 });

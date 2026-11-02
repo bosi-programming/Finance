@@ -2,11 +2,13 @@ import { Outlet, useLocation } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { Toast, ToastContainer } from 'bosi-design-system/react';
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppNavigation } from '@/components/AppNavigation';
 import { useSelfRedirectBlock } from '@/components/useSelfRedirectBlock';
 import { useFinanceStore } from '@/store';
 
 export function RootLayout() {
+  const { t } = useTranslation();
   const toast = useFinanceStore((state) => state.toast);
   const clearToast = useFinanceStore((state) => state.clearToast);
   const pathname = useLocation({ select: (location) => location.pathname });
@@ -33,7 +35,11 @@ export function RootLayout() {
       </main>
       {toast !== null && (
         <ToastContainer>
-          <Toast message={toast} onClose={clearToast} closeLabel="Close" />
+          <Toast
+            message={toast}
+            onClose={clearToast}
+            closeLabel={t('common.close')}
+          />
         </ToastContainer>
       )}
       <TanStackRouterDevtools />

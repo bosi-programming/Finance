@@ -7,16 +7,10 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  BUDGET_CATEGORY_REQUIRED_MESSAGE,
-  BUDGET_NAME_REQUIRED_MESSAGE,
-  BUDGET_TYPE_REQUIRED_MESSAGE,
-  FIXED_VALUE_INVALID_MESSAGE,
-  PERCENTAGE_VALUE_INVALID_MESSAGE,
-} from '@/domain/budgets/budgetDraft';
+import { i18n } from '@/i18n';
 import { db } from '@/persistence/db';
 import { routeTree } from '@/router';
-import { STORAGE_FAILED_MESSAGE, useFinanceStore } from '@/store';
+import { storageFailedMessage, useFinanceStore } from '@/store';
 import { resetPersistence } from '@/test/resetPersistence';
 import type { Budget } from '@/types/budget';
 
@@ -315,7 +309,7 @@ describe('Budgets page', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      STORAGE_FAILED_MESSAGE,
+      storageFailedMessage(),
     );
     expect(useFinanceStore.getState().budgets).toHaveLength(2);
     expect(
@@ -356,14 +350,12 @@ describe('Budgets page', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     expect(
-      within(dialog).getByText(BUDGET_NAME_REQUIRED_MESSAGE),
+      within(dialog).getByText('Enter a budget name.'),
     ).toBeInTheDocument();
     expect(
-      within(dialog).queryByText(BUDGET_TYPE_REQUIRED_MESSAGE),
+      within(dialog).queryByText('Choose a budget type.'),
     ).not.toBeInTheDocument();
-    expect(
-      within(dialog).getByText(BUDGET_CATEGORY_REQUIRED_MESSAGE),
-    ).toBeInTheDocument();
+    expect(within(dialog).getByText('Choose a category.')).toBeInTheDocument();
     expect(
       screen.getByRole('dialog', { name: 'Add budget' }),
     ).toBeInTheDocument();
@@ -379,7 +371,7 @@ describe('Budgets page', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     expect(
-      within(dialog).getByText(BUDGET_TYPE_REQUIRED_MESSAGE),
+      within(dialog).getByText('Choose a budget type.'),
     ).toBeInTheDocument();
     expect(
       within(dialog).getByRole('combobox', { name: 'Type' }),
@@ -406,7 +398,7 @@ describe('Budgets page', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     expect(
-      within(dialog).getByText(BUDGET_NAME_REQUIRED_MESSAGE),
+      within(dialog).getByText('Enter a budget name.'),
     ).toBeInTheDocument();
     expect(name).toHaveAttribute('aria-invalid', 'true');
     expect(useFinanceStore.getState().budgets).toEqual([]);
@@ -426,7 +418,7 @@ describe('Budgets page', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     expect(
-      within(dialog).getByText(FIXED_VALUE_INVALID_MESSAGE),
+      within(dialog).getByText('Enter an amount above $ 0.00.'),
     ).toBeInTheDocument();
   });
 
@@ -444,7 +436,7 @@ describe('Budgets page', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     expect(
-      within(dialog).getByText(PERCENTAGE_VALUE_INVALID_MESSAGE),
+      within(dialog).getByText('Enter a percentage between 0 and 100.'),
     ).toBeInTheDocument();
   });
 
@@ -456,9 +448,7 @@ describe('Budgets page', () => {
     await pickCategory(user, dialog, '+ Add new category');
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
-    expect(
-      within(dialog).getByText(BUDGET_CATEGORY_REQUIRED_MESSAGE),
-    ).toBeInTheDocument();
+    expect(within(dialog).getByText('Choose a category.')).toBeInTheDocument();
   });
 
   it("clears a field's error on its next edit", async () => {
@@ -470,11 +460,9 @@ describe('Budgets page', () => {
     await user.type(within(dialog).getByRole('textbox', { name: 'Name' }), 'R');
 
     expect(
-      within(dialog).queryByText(BUDGET_NAME_REQUIRED_MESSAGE),
+      within(dialog).queryByText('Enter a budget name.'),
     ).not.toBeInTheDocument();
-    expect(
-      within(dialog).getByText(BUDGET_CATEGORY_REQUIRED_MESSAGE),
-    ).toBeInTheDocument();
+    expect(within(dialog).getByText('Choose a category.')).toBeInTheDocument();
   });
 
   it('clears the value error on the next value edit', async () => {
@@ -485,7 +473,7 @@ describe('Budgets page', () => {
     await pickType(user, dialog, 'Fixed');
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
     expect(
-      within(dialog).getByText(FIXED_VALUE_INVALID_MESSAGE),
+      within(dialog).getByText('Enter an amount above $ 0.00.'),
     ).toBeInTheDocument();
 
     await user.type(
@@ -494,7 +482,7 @@ describe('Budgets page', () => {
     );
 
     expect(
-      within(dialog).queryByText(FIXED_VALUE_INVALID_MESSAGE),
+      within(dialog).queryByText('Enter an amount above $ 0.00.'),
     ).not.toBeInTheDocument();
   });
 
@@ -511,7 +499,7 @@ describe('Budgets page', () => {
     await user.click(screen.getByRole('option', { name: 'Housing' }));
 
     expect(
-      within(dialog).queryByText(BUDGET_CATEGORY_REQUIRED_MESSAGE),
+      within(dialog).queryByText('Choose a category.'),
     ).not.toBeInTheDocument();
   });
 
@@ -529,7 +517,7 @@ describe('Budgets page', () => {
     );
 
     expect(
-      within(dialog).queryByText(BUDGET_CATEGORY_REQUIRED_MESSAGE),
+      within(dialog).queryByText('Choose a category.'),
     ).not.toBeInTheDocument();
   });
 
@@ -596,16 +584,16 @@ describe('Budgets page', () => {
     );
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
     expect(
-      within(dialog).getByText(FIXED_VALUE_INVALID_MESSAGE),
+      within(dialog).getByText('Enter an amount above $ 0.00.'),
     ).toBeInTheDocument();
 
     await pickType(user, dialog, 'Percentage');
 
     expect(
-      within(dialog).queryByText(FIXED_VALUE_INVALID_MESSAGE),
+      within(dialog).queryByText('Enter an amount above $ 0.00.'),
     ).not.toBeInTheDocument();
     expect(
-      within(dialog).queryByText(PERCENTAGE_VALUE_INVALID_MESSAGE),
+      within(dialog).queryByText('Enter a percentage between 0 and 100.'),
     ).not.toBeInTheDocument();
   });
 
@@ -632,7 +620,7 @@ describe('Budgets page', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     expect(
-      within(dialog).getByText(PERCENTAGE_VALUE_INVALID_MESSAGE),
+      within(dialog).getByText('Enter a percentage between 0 and 100.'),
     ).toBeInTheDocument();
     expect(useFinanceStore.getState().budgets).toEqual([]);
   });
@@ -1053,5 +1041,74 @@ describe('Budgets page', () => {
       'Percentages sum to 110% — must be 100% or less.',
     );
     expect(testRouter.state.location.pathname).toBe('/budgets');
+  });
+});
+
+describe('Budgets page in es', () => {
+  beforeEach(async () => {
+    await resetPersistence();
+    await i18n.changeLanguage('es');
+    useFinanceStore.setState({ salary: 5000 });
+  });
+
+  it('lists budgets in Spanish with euros', async () => {
+    useFinanceStore.setState({ budgets: [rent, fun] });
+
+    await renderRoute('/budgets');
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Tus presupuestos' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Fijo · 2000 € / mes')).toBeInTheDocument();
+    expect(screen.getByText('Porcentaje · 60%')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Editar Rent' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Eliminar Rent' }),
+    ).toBeInTheDocument();
+  });
+
+  it('warns about fixed budgets over the salary in Spanish', async () => {
+    useFinanceStore.setState({ budgets: [{ ...rent, value: 6000.5 }] });
+
+    await renderRoute('/budgets');
+
+    expect(
+      screen.getByText(
+        'Los presupuestos fijos superan el salario en 1000,50 €.',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('adds a budget typed in the Spanish format', async () => {
+    useFinanceStore.setState({ budgets: [rent] });
+    await renderRoute('/budgets');
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Añadir presupuesto' }),
+    );
+    const dialog = screen.getByRole('dialog', { name: 'Añadir presupuesto' });
+    await userEvent.type(
+      within(dialog).getByRole('textbox', { name: 'Nombre' }),
+      'Luz',
+    );
+    await userEvent.click(
+      within(dialog).getByRole('combobox', { name: 'Categoría' }),
+    );
+    await userEvent.click(screen.getByRole('option', { name: 'Housing' }));
+    await userEvent.type(
+      within(dialog).getByRole('textbox', { name: 'Valor' }),
+      '89,90 €',
+    );
+    await userEvent.click(
+      within(dialog).getByRole('button', { name: 'Guardar' }),
+    );
+
+    expect(useFinanceStore.getState().budgets[1]).toMatchObject({
+      name: 'Luz',
+      value: 89.9,
+      category: 'Housing',
+    });
   });
 });

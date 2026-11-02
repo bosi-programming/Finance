@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+import '@/i18n';
 import { useFinanceStore } from '@/store';
 import { Budgets } from './Budgets';
 

@@ -12,6 +12,7 @@ import {
 } from '@tanstack/react-router';
 
 import { Result } from '@/pages/Result';
+import '@/i18n';
 import { useFinanceStore } from '@/store';
 import { type Budget } from '@/types/budget';
 

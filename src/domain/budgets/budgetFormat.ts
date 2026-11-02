@@ -1,5 +1,8 @@
+import { type TFunction } from 'i18next';
+
+import { formatMoney, formatNumber } from '@/domain/money';
+import { LOCALE_SETTINGS, type LocaleSettings } from '@/i18n/languages';
 import { type Budget } from '@/types/budget';
-import { formatMoney } from '@/domain/money';
 
 export interface BudgetGroup {
   category: string;
@@ -9,24 +12,31 @@ export interface BudgetGroup {
 }
 
 const TOTAL_SEPARATOR = ' · ';
+const DEFAULT_SETTINGS = LOCALE_SETTINGS.en;
 
 export { formatMoney };
 
 export function formatPercent(
   value: number,
   maximumFractionDigits = 2,
+  settings: LocaleSettings = DEFAULT_SETTINGS,
 ): string {
-  const amount = new Intl.NumberFormat('en-US', {
-    maximumFractionDigits,
-  }).format(value);
-  return `${amount}%`;
+  return `${formatNumber(value, maximumFractionDigits, settings)}%`;
 }
 
-export function budgetDetails(budget: Budget): string {
+export function budgetDetails(
+  budget: Budget,
+  t: TFunction,
+  settings: LocaleSettings = DEFAULT_SETTINGS,
+): string {
   if (budget.type === 'fixed') {
-    return `Fixed · ${formatMoney(budget.value)} / month`;
+    return t('format.detailsFixed', {
+      amount: formatMoney(budget.value, settings),
+    });
   }
-  return `Percentage · ${formatPercent(budget.value)}`;
+  return t('format.detailsPercentage', {
+    percent: formatPercent(budget.value, 2, settings),
+  });
 }
 
 export function groupBudgets(budgets: Budget[]): BudgetGroup[] {
@@ -49,13 +59,16 @@ export function groupBudgets(budgets: Budget[]): BudgetGroup[] {
   return [...groups.values()];
 }
 
-export function formatGroupTotal(group: BudgetGroup): string {
+export function formatGroupTotal(
+  group: BudgetGroup,
+  settings: LocaleSettings = DEFAULT_SETTINGS,
+): string {
   const parts: string[] = [];
   if (group.budgets.some((budget) => budget.type === 'fixed')) {
-    parts.push(formatMoney(group.fixedTotal));
+    parts.push(formatMoney(group.fixedTotal, settings));
   }
   if (group.budgets.some((budget) => budget.type === 'percentage')) {
-    parts.push(formatPercent(group.percentageTotal));
+    parts.push(formatPercent(group.percentageTotal, 2, settings));
   }
   return parts.join(TOTAL_SEPARATOR);
 }

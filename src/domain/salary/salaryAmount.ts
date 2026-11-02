@@ -1,4 +1,5 @@
 import { formatMoneyFixed, parseMoney } from '@/domain/money';
+import { LOCALE_SETTINGS, type LocaleSettings } from '@/i18n/languages';
 
 export type SalaryErrorReason = 'empty' | 'invalid';
 
@@ -6,17 +7,28 @@ export type SalaryParseResult =
   | { ok: true; value: number }
   | { ok: false; reason: SalaryErrorReason };
 
-export const SALARY_REQUIRED_MESSAGE = 'Enter your gross salary.';
-export const SALARY_INVALID_MESSAGE = 'Enter an amount of $ 0.00 or more.';
+export type SalaryErrorKey =
+  | 'validation.salaryRequired'
+  | 'validation.salaryInvalid';
 
-export function parseSalary(text: string): SalaryParseResult {
-  return parseMoney(text);
+const DEFAULT_SETTINGS = LOCALE_SETTINGS.en;
+
+export function parseSalary(
+  text: string,
+  settings: LocaleSettings = DEFAULT_SETTINGS,
+): SalaryParseResult {
+  return parseMoney(text, settings);
 }
 
-export function formatSalary(value: number): string {
-  return formatMoneyFixed(value);
+export function formatSalary(
+  value: number,
+  settings: LocaleSettings = DEFAULT_SETTINGS,
+): string {
+  return formatMoneyFixed(value, settings);
 }
 
-export function salaryErrorMessage(reason: SalaryErrorReason): string {
-  return reason === 'empty' ? SALARY_REQUIRED_MESSAGE : SALARY_INVALID_MESSAGE;
+export function salaryErrorKey(reason: SalaryErrorReason): SalaryErrorKey {
+  return reason === 'empty'
+    ? 'validation.salaryRequired'
+    : 'validation.salaryInvalid';
 }

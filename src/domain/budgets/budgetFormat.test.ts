@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { i18n } from '@/i18n';
+import { LOCALE_SETTINGS } from '@/i18n/languages';
 import type { Budget } from '@/types/budget';
 
 import {
@@ -85,11 +87,11 @@ describe('formatPercent', () => {
 
 describe('budgetDetails', () => {
   it('describes a fixed budget', () => {
-    expect(budgetDetails(rent)).toBe('Fixed · $2,000 / month');
+    expect(budgetDetails(rent, i18n.t)).toBe('Fixed · $2,000 / month');
   });
 
   it('describes a percentage budget', () => {
-    expect(budgetDetails(fun)).toBe('Percentage · 60%');
+    expect(budgetDetails(fun, i18n.t)).toBe('Percentage · 60%');
   });
 });
 
@@ -140,5 +142,37 @@ describe('formatGroupTotal', () => {
     const [group] = groupBudgets([rent, save]);
 
     expect(formatGroupTotal(group)).toBe('$2,000 · 10%');
+  });
+});
+
+describe('in pt-BR and es', () => {
+  const ptBR = LOCALE_SETTINGS['pt-BR'];
+  const es = LOCALE_SETTINGS.es;
+
+  it('formats percents with the locale decimal', () => {
+    expect(formatPercent(12.5, 2, ptBR)).toBe('12,5%');
+    expect(formatPercent(12.5, 2, es)).toBe('12,5%');
+  });
+
+  it('describes budgets in the active language', async () => {
+    await i18n.changeLanguage('pt-BR');
+
+    expect(budgetDetails(rent, i18n.t, ptBR)).toBe('Fixo · R$ 2.000 / mês');
+    expect(budgetDetails({ ...fun, value: 12.5 }, i18n.t, ptBR)).toBe(
+      'Percentual · 12,5%',
+    );
+  });
+
+  it('joins group totals in the locale', () => {
+    const save: Budget = {
+      id: 'save-1',
+      name: 'Savings',
+      type: 'percentage',
+      value: 10.5,
+      category: 'Housing',
+    };
+    const [group] = groupBudgets([rent, save]);
+
+    expect(formatGroupTotal(group, es)).toBe('2000 € · 10,5%');
   });
 });

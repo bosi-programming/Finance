@@ -1,4 +1,5 @@
 import { Button, Modal, Typography } from 'bosi-design-system/react';
+import { useTranslation } from 'react-i18next';
 
 import { type Budget } from '@/types/budget';
 
@@ -11,23 +12,25 @@ export function DeleteBudgetModal({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <Modal
       open
-      title={`Delete ${budget.name}?`}
+      title={t('deleteBudget.title', { name: budget.name })}
       onClose={onCancel}
       actions={
         <>
           <Button color="secondary" onClick={onCancel}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button action="error" onClick={onConfirm}>
-            Delete
+            {t('common.delete')}
           </Button>
         </>
       }
     >
-      <Typography size="body">This can&apos;t be undone.</Typography>
+      <Typography size="body">{t('deleteBudget.body')}</Typography>
     </Modal>
   );
 }

@@ -7,6 +7,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { i18n } from '@/i18n';
 import { routeTree } from '@/router';
 import { useFinanceStore } from '@/store';
 import { resetPersistence } from '@/test/resetPersistence';
@@ -473,5 +474,28 @@ describe('Result page', () => {
         screen.queryByRole('button', { name: 'Enter salary' }),
       ).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('Result page in pt-BR', () => {
+  beforeEach(async () => {
+    await resetPersistence();
+    await i18n.changeLanguage('pt-BR');
+  });
+
+  it('shows the breakdown in Portuguese with reais', async () => {
+    useFinanceStore.setState({ salary: 5000, budgets: [rent, travel] });
+
+    await renderRoute('/result');
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Resultado' }),
+    ).toBeInTheDocument();
+    expect(within(region('Salário')).getByText('R$ 5.000')).toBeVisible();
+    expect(within(region('Restante')).getByText('R$ 1.200')).toBeVisible();
+    expect(screen.getByText('Percentual · 60%')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Editar orçamentos' }),
+    ).toBeInTheDocument();
   });
 });

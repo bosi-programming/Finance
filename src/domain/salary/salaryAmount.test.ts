@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatSalary, parseSalary, salaryErrorMessage } from './salaryAmount';
+import { LOCALE_SETTINGS } from '@/i18n/languages';
+
+import { formatSalary, parseSalary, salaryErrorKey } from './salaryAmount';
 
 describe('parseSalary', () => {
   it.each([
@@ -46,11 +48,19 @@ describe('formatSalary', () => {
   });
 });
 
-describe('salaryErrorMessage', () => {
-  it('maps each reason to its message', () => {
-    expect(salaryErrorMessage('empty')).toBe('Enter your gross salary.');
-    expect(salaryErrorMessage('invalid')).toBe(
-      'Enter an amount of $ 0.00 or more.',
-    );
+describe('salaryErrorKey', () => {
+  it('maps each reason to its translation key', () => {
+    expect(salaryErrorKey('empty')).toBe('validation.salaryRequired');
+    expect(salaryErrorKey('invalid')).toBe('validation.salaryInvalid');
+  });
+});
+
+describe('in pt-BR and es', () => {
+  it('parses and formats in the locale', () => {
+    expect(parseSalary('R$ 5.000,50', LOCALE_SETTINGS['pt-BR'])).toEqual({
+      ok: true,
+      value: 5000.5,
+    });
+    expect(formatSalary(5000.5, LOCALE_SETTINGS.es)).toBe('5000,50 €');
   });
 });
