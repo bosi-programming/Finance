@@ -30,6 +30,22 @@ async function addBudget(
   await expect(dialog).toBeHidden();
 }
 
+const STORED_BUDGET_COUNT = `new Promise((resolve, reject) => {
+  const request = indexedDB.open('finance-fe');
+  request.onerror = () => reject(new Error('cannot open finance-fe'));
+  request.onsuccess = () => {
+    const read = request.result
+      .transaction('appState')
+      .objectStore('appState')
+      .get('current');
+    read.onsuccess = () => resolve(read.result?.budgets?.length ?? 0);
+  };
+})`;
+
+function storedBudgetCount(page: Page): Promise<number> {
+  return page.evaluate<number>(STORED_BUDGET_COUNT);
+}
+
 test('redirects a fresh /result and keeps /result on reload', async ({
   page,
 }) => {
@@ -47,6 +63,7 @@ test('redirects a fresh /result and keeps /result on reload', async ({
     type: 'Fixed',
     value: '2000',
   });
+  await expect.poll(() => storedBudgetCount(page)).toBe(1);
   await page.goto('/result');
   await expect(page).toHaveURL(/\/result$/);
 

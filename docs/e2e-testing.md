@@ -45,8 +45,9 @@ pnpm test:e2e
 
 - `playwright.config.ts` runs `pnpm build`, then `vite preview` on port 4173.
 - `baseURL` must stay on `localhost`: `crypto.randomUUID` in `Budgets.tsx` needs a secure context.
-- The spec uses user-visible roles and labels only, with no store, IndexedDB or `src` import.
+- `user-flow.spec.ts` uses user-visible roles and labels only, with no store, IndexedDB or `src` import.
 - `retries` is `0`, so flakes show instead of hiding.
+- Each store action writes IndexedDB without waiting. A `page.goto` or `page.reload` right after an edit can cancel that write, so `route-guards.spec.ts` polls the stored row first. It only reads the row; it never writes it.
 - One long test means a failure hides later steps; step titles name the failure.
 - If a failure exposes an app bug, fix it test-first in a unit or page test. Do not loosen this test.
 
