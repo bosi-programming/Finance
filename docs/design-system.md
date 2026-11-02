@@ -217,4 +217,4 @@ Requirements for how the app consumes the design system (ENG-4).
 - Run locally with `pnpm storybook`; ship a static build with
   `pnpm build-storybook`.
 - Stories are colocated with their page source — one story per page
-  (Home, Salary, Budgets, Result).
+  (Salary, Budgets, Result).
