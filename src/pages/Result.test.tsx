@@ -465,38 +465,13 @@ describe('Result page', () => {
 
   describe('missing data', () => {
     it('shows the plan for a salary of 0', async () => {
-      useFinanceStore.setState({ salary: 0, budgets: [] });
+      useFinanceStore.setState({ salary: 0, budgets: [rent] });
       await renderRoute('/result');
 
       expect(within(region('Salary')).getByText('$0')).toBeInTheDocument();
       expect(
         screen.queryByRole('button', { name: 'Enter salary' }),
       ).not.toBeInTheDocument();
-    });
-
-    it('Enter salary goes to salary', async () => {
-      const testRouter = await renderRoute('/result');
-
-      await userEvent.click(
-        screen.getByRole('button', { name: 'Enter salary' }),
-      );
-
-      await waitFor(() => {
-        expect(testRouter.state.location.pathname).toBe('/salary');
-      });
-    });
-
-    it('shows salary and Remaining with no budgets', async () => {
-      useFinanceStore.setState({ salary: 5000, budgets: [] });
-      await renderRoute('/result');
-
-      expect(within(region('Salary')).getByText('$5,000')).toBeInTheDocument();
-      expect(
-        within(region('Remaining')).getByText('$5,000'),
-      ).toBeInTheDocument();
-      expect(
-        within(screen.getByRole('main')).queryAllByRole('listitem'),
-      ).toHaveLength(0);
     });
   });
 });

@@ -89,6 +89,7 @@ describe('navigation', () => {
   });
 
   it('marks only the active route', async () => {
+    useFinanceStore.setState({ salary: 5000 });
     await renderRoute('/budgets');
 
     expect(screen.getByRole('link', { name: 'Budgets' })).toHaveAttribute(
@@ -115,6 +116,7 @@ describe('navigation', () => {
   });
 
   it('navigates when a link is clicked', async () => {
+    useFinanceStore.setState({ salary: 5000, budgets: [rent] });
     const testRouter = await renderRoute('/salary');
 
     await userEvent.click(screen.getByRole('link', { name: 'Result' }));
@@ -135,6 +137,7 @@ describe('navigation', () => {
   });
 
   it('moves focus to main after navigating', async () => {
+    useFinanceStore.setState({ salary: 5000, budgets: [rent] });
     await renderRoute('/salary');
 
     await userEvent.click(screen.getByRole('link', { name: 'Result' }));

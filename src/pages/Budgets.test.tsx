@@ -68,7 +68,10 @@ async function renderRoute(path: string) {
 }
 
 describe('Budgets page', () => {
-  beforeEach(resetPersistence);
+  beforeEach(async () => {
+    await resetPersistence();
+    useFinanceStore.setState({ salary: 5000 });
+  });
 
   it('shows the empty state with no budgets', async () => {
     await renderRoute('/budgets');
@@ -987,13 +990,6 @@ describe('Budgets page', () => {
         { ...rent, id: 'rent-2', value: 0.2 },
       ],
     });
-    await renderRoute('/budgets');
-
-    expect(screen.queryByText(/Fixed budgets exceed/)).not.toBeInTheDocument();
-  });
-
-  it('does not warn without a salary', async () => {
-    useFinanceStore.setState({ salary: null, budgets: [rent] });
     await renderRoute('/budgets');
 
     expect(screen.queryByText(/Fixed budgets exceed/)).not.toBeInTheDocument();

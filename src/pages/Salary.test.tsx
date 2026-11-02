@@ -220,6 +220,43 @@ describe('Salary page', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('hides Add budgets with a salary and budgets', async () => {
+    useFinanceStore.setState({ salary: 5000, budgets: [rent] });
+    await renderRoute('/salary');
+
+    expect(
+      screen.queryByRole('button', { name: 'Add budgets' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('Add budgets goes to budgets with a salary and no budgets', async () => {
+    useFinanceStore.setState({ salary: 5000, budgets: [] });
+    const testRouter = await renderRoute('/salary');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add budgets' }));
+
+    await waitFor(() => {
+      expect(testRouter.state.location.pathname).toBe('/budgets');
+    });
+  });
+
+  it('shows Add budgets at salary 0 with no budgets', async () => {
+    useFinanceStore.setState({ salary: 0, budgets: [] });
+    await renderRoute('/salary');
+
+    expect(
+      screen.getByRole('button', { name: 'Add budgets' }),
+    ).toBeInTheDocument();
+  });
+
+  it('hides Add budgets with no salary', async () => {
+    await renderRoute('/salary');
+
+    expect(
+      screen.queryByRole('button', { name: 'Add budgets' }),
+    ).not.toBeInTheDocument();
+  });
+
   it('still goes to budgets when saving fails', async () => {
     vi.spyOn(db.appState, 'put').mockRejectedValue(new Error('quota'));
     const testRouter = await renderRoute('/salary');
