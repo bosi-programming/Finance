@@ -14,6 +14,7 @@
     "format:fix": "prettier --write .",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:e2e": "playwright test",
     "depcruise:json": "mkdir -p .tmp && depcruise --metrics src --output-type json --output-to .tmp/dependency-cruiser.json",
     "metrics:architecture": "pnpm depcruise:json && tsx scripts/architecture-metrics.ts",
     "prepare": "simple-git-hooks"
@@ -40,6 +41,7 @@
   "devDependencies": {
     "@eslint/compat": "1.2.3",
     "@eslint/js": "9.36.0",
+    "@playwright/test": "1.61.1",
     "@storybook/addon-vitest": "^10.2.9",
     "@storybook/react-vite": "10.5.0",
     "@tailwindcss/vite": "4.1.16",
