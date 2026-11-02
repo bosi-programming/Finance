@@ -4,6 +4,7 @@ This document maps the end-to-end flow a user follows to enter a salary, manage 
 
 ## Routes
 
+- `/` — redirects to `/salary`.
 - `/salary` — salary input.
 - `/budgets` — budget CRUD.
 - `/result` — allocation preview.
@@ -12,30 +13,31 @@ This document maps the end-to-end flow a user follows to enter a salary, manage 
 
 ```mermaid
 flowchart TD
-    Start([User opens app]) --> HasSalary{salary exists?}
-    HasSalary -->|yes| HasBudgets{budgets exist?}
-    HasSalary -->|no| Salary[/salary]
-    HasBudgets -->|yes| Result[/result]
-    HasBudgets -->|no| Budgets[/budgets]
+    Start([User opens app at /]) --> Salary[/salary]
     Salary --> EnterSalary[Enter salary]
     Salary --> ImportJSON[Import JSON]
     EnterSalary --> SaveSalary[Save salary]
     ImportJSON --> SaveSalary
-    SaveSalary --> Budgets
+    SaveSalary --> Budgets[/budgets]
     Salary --> EditSalary[Edit salary]
     EditSalary --> SaveSalary
-    Salary --> GoToResult[Go to result]
-    GoToResult --> Result
+    Salary --> HasBudgets{budgets exist?}
+    HasBudgets -->|yes| GoToResult[See result]
+    HasBudgets -->|no| AddBudgets[Add budgets]
+    GoToResult --> Result[/result]
+    AddBudgets --> Budgets
 ```
 
-- First visit lands on `/salary`.
+- `/` always redirects to `/salary`, with or without stored data.
 - `/salary` shows two primary actions:
   - enter salary manually;
   - import JSON from the existing CLI migration or from other time user was on site
 - Salary input is required and must be a non-negative number.
 - After saving salary, the user is redirected to `/budgets`.
 - `/salary` remains editable later.
-- If budgets already exist, `/salary` shows a secondary CTA to `/result`.
+- With a saved salary and budgets, `/salary` shows a secondary "See result" CTA to `/result`.
+- With a saved salary and no budgets, `/salary` shows a secondary "Add budgets" CTA to `/budgets`.
+- With no saved salary, `/salary` shows neither CTA. A salary of `0` counts as saved.
 - Importing JSON replaces salary and budgets and redirects to `/result` or `/budgets` depending on whether budgets are present.
 
 ## Budget CRUD flow
@@ -102,12 +104,10 @@ flowchart TD
 ```
 
 - `/result` displays the allocation breakdown.
-- Redirect guards:
+- Redirect guards, see [redirect rules](#redirect-rules):
   - no salary -> redirect to `/salary`;
   - no budgets -> redirect to `/budgets`.
-- These guards are not built yet (BOS-98). Until they are, `/result` stays reachable:
-  - no salary: the heading, the hint "Enter your salary to see your result." and an `Enter salary` CTA to `/salary`;
-  - salary and no budgets: the salary, `Remaining` equal to the salary and the CTA.
+- `/result` never renders without a salary and at least one budget.
 - The screen shows:
   - salary;
   - budgets grouped by category;
@@ -153,13 +153,25 @@ flowchart LR
 
 ## Redirect rules
 
-| From       | Condition                     | Redirect to       |
-| ---------- | ----------------------------- | ----------------- |
-| `/budgets` | no salary                     | `/salary`         |
-| `/result`  | no salary                     | `/salary`         |
-| `/result`  | no budgets                    | `/budgets`        |
-| `/salary`  | salary saved, budgets present | CTA to `/result`  |
-| `/salary`  | salary saved, no budgets      | CTA to `/budgets` |
+| From       | Condition                     | Redirect to                     |
+| ---------- | ----------------------------- | ------------------------------- |
+| `/`        | always                        | `/salary`                       |
+| `/budgets` | no salary                     | `/salary`                       |
+| `/result`  | no salary                     | `/salary`                       |
+| `/result`  | salary saved, no budgets      | `/budgets`                      |
+| `/salary`  | salary saved, budgets present | "See result" CTA to `/result`   |
+| `/salary`  | salary saved, no budgets      | "Add budgets" CTA to `/budgets` |
+
+- Guards run in each route's `beforeLoad` in `src/router.tsx`, before the page renders. The rules live in the pure function `routeRedirect` in `src/domain/routing/routeRedirect.ts`.
+- They apply to a direct load, a reload, a nav link click and `navigate()` alike.
+- `/result` checks the salary rule first: no salary and no budgets goes straight to `/salary`.
+- A salary of `0` counts as saved. Only a missing salary triggers the salary rule.
+- The router mounts only after `PersistenceGate` reads stored data, so a reload with stored data stays on the current route.
+- History:
+  - a redirect replaces the blocked entry, so Back does not return to the blocked route;
+  - on a direct load or reload, a redirect adds no history entry;
+  - a nav link click pushes its entry before the guard runs. When the redirect target is the current page, for example clicking Result on `/salary` with no salary, history gains a duplicate entry and Back stays on the same page once.
+- Guards do not react to store changes while a page is open, such as another tab clearing data. The next navigation applies them.
 
 ## State-to-UI mapping
 

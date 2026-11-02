@@ -1,4 +1,4 @@
-# End-to-end test
+# End-to-end tests
 
 `e2e/user-flow.spec.ts` drives one user journey in real Chromium against the production build.
 
@@ -18,9 +18,15 @@ One test, `user flow from salary to JSON round trip`, starting from empty Indexe
 | `export JSON`           | Downloads `finance-fe-v0.json` with version `v0`, salary and both budgets                 |
 | `import JSON`           | New browser context imports that file through `Import JSON`; `/result` shows same numbers |
 
+`e2e/route-guards.spec.ts` holds one test, `redirects a fresh /result and keeps /result on reload`, starting from empty IndexedDB:
+
+- a fresh `/result` lands on `/salary`;
+- after saving salary `5000` and adding budget Rent, `/result` stays on `/result` across a real browser reload.
+
 Not covered here:
 
 - Error and warning states, validation, edit and delete: see `src/pages/Budgets.test.tsx` and `src/pages/Result.test.tsx`.
+- Other redirect rules, nav link redirects and history: see `src/router.test.tsx` and `src/domain/routing/routeRedirect.test.ts`.
 - Other browsers and mobile viewports: Chromium with Desktop Chrome viewport only.
 
 ## Run
