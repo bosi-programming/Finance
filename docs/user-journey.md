@@ -170,7 +170,7 @@ flowchart LR
 - History:
   - a redirect replaces the blocked entry, so Back does not return to the blocked route;
   - on a direct load or reload, a redirect adds no history entry;
-  - a nav link click pushes its entry before the guard runs. When the redirect target is the current page, for example clicking Result on `/salary` with no salary, history gains a duplicate entry and Back stays on the same page once.
+  - a nav link click or `navigate()` to a blocked route whose redirect target is the current page, for example clicking Result on `/salary` with no salary, is blocked before it is committed, so history gains no entry. `useSelfRedirectBlock` in `src/components/useSelfRedirectBlock.ts` does this with TanStack's `useBlocker`.
 - Guards do not react to store changes while a page is open, such as another tab clearing data. The next navigation applies them.
 
 ## State-to-UI mapping
