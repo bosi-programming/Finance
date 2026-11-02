@@ -32,7 +32,7 @@ pnpm test:e2e
 
 - Install the browser once per machine.
 - `pnpm test:run` does not run this test: Vitest includes `src/**` only.
-- Outside CI, a server already on port 4173 is reused, so stop old previews to test a fresh build.
+- Without `CI` set, a server already on port 4173 is reused, so stop old previews to test a fresh build.
 - Failure traces land in `test-results/`, which git ignores.
 
 ## How it works
@@ -46,16 +46,6 @@ pnpm test:e2e
 
 ## CI
 
-`.woodpecker/e2e.yaml` runs `pnpm test:e2e` on push and manual events on `main`.
+No CI runs this test yet. Passing runs so far are local only.
 
-- Image tag `v1.61.1-noble` must move with `@playwright/test` `1.61.1`.
-- Scope is running the test: no artifact upload, no caching.
-
-Not verified, as of BOS-18 (2026-11-02):
-
-- The pipeline has never run, and no run has been seen. Passing runs so far are local only.
-- The commits adding it were not pushed when this was written.
-- Woodpecker access for this repo on Codeberg is unknown. It needs an access request and repo enable.
-- The Playwright image, `pnpm install` of `bosi-design-system` from GitHub and the test inside the container were not run.
-
-If Woodpecker is not available, the pipeline file stays and the CI criterion stays unverified. Alternatives: Forgejo Actions with an own runner, or a GitHub Actions mirror.
+CI waits on moving the repo to GitHub and adding a GitHub Actions workflow: BOS-113.
