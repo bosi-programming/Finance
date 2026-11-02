@@ -32,8 +32,10 @@
     "bosi-design-system": "github:bosi-programming/bosi-design-system",
     "dexie": "4.4.7",
     "dexie-react-hooks": "4.4.0",
+    "i18next": "26.7.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-i18next": "17.1.11",
     "ts-pattern": "5.9.0",
     "zod": "4.1.12",
     "zustand": "5.0.14"
