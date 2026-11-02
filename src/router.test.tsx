@@ -135,6 +135,18 @@ describe('router', () => {
     ).toBeInTheDocument();
   });
 
+  it('keeps history length on a Budgets link click with no salary', async () => {
+    const testRouter = await renderRoute('/salary');
+
+    await userEvent.click(screen.getByRole('link', { name: 'Budgets' }));
+
+    await waitFor(() => {
+      expect(testRouter.state.status).toBe('idle');
+    });
+    expect(testRouter.state.location.pathname).toBe('/salary');
+    expect(testRouter.history.length).toBe(1);
+  });
+
   it('redirects /result to /salary with no salary', async () => {
     const testRouter = await renderRoute('/result');
 

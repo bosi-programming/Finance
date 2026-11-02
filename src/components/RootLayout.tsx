@@ -3,6 +3,7 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { Toast, ToastContainer } from 'bosi-design-system/react';
 import { useEffect, useRef } from 'react';
 import { AppNavigation } from '@/components/AppNavigation';
+import { useSelfRedirectBlock } from '@/components/useSelfRedirectBlock';
 import { useFinanceStore } from '@/store';
 
 export function RootLayout() {
@@ -10,6 +11,7 @@ export function RootLayout() {
   const clearToast = useFinanceStore((state) => state.clearToast);
   const pathname = useLocation({ select: (location) => location.pathname });
   const mainRef = useRef<HTMLElement | null>(null);
+  useSelfRedirectBlock();
   const previousPathname = useRef(pathname);
 
   useEffect(() => {
