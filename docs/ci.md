@@ -10,6 +10,7 @@ Both workflows run on push to `main` and on manual `workflow_dispatch`, on Ubunt
 | `E2E`    | `.github/workflows/e2e.yml`   | `pnpm test:e2e`: Playwright user flow     |
 
 - `SKIP_INSTALL_SIMPLE_GIT_HOOKS=1` keeps `prepare` from installing git hooks in CI.
+- `Tests` first checks `simple-git-hooks.pre-commit` in `package.json` still runs `pnpm test:run`, failing the run if not.
 - E2E details: `e2e-testing.md`.
 
 ## Pre-commit hook
