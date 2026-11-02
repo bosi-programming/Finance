@@ -11,7 +11,6 @@ import {
 } from '@/domain/routing/routeRedirect';
 import { useFinanceStore } from '@/store';
 import { Budgets } from './pages/Budgets';
-import { Home } from './pages/Home';
 import { Result } from './pages/Result';
 import { Salary } from './pages/Salary';
 
@@ -28,7 +27,9 @@ const rootRoute = createRootRoute({ component: RootLayout });
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: Home,
+  beforeLoad: () => {
+    redirect({ to: '/salary', replace: true, throw: true });
+  },
 });
 
 const salaryRoute = createRoute({
