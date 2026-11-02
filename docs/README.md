@@ -11,3 +11,4 @@
 | `design-system.md`       | Tokens, components, and usage patterns for the UI                 |
 | `e2e-testing.md`         | Playwright user flow, how to run it, and CI status                |
 | `ci.md`                  | GitHub Actions workflows and the pre-commit hook                  |
+| `i18n.md`                | Languages, number and currency formats, adding translated text    |
