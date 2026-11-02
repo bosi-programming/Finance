@@ -36,7 +36,7 @@ const percentageBudget = (
 });
 
 const withPlan =
-  (salary: number | null, budgets: Budget[]): Decorator =>
+  (salary: number, budgets: Budget[]): Decorator =>
   (Story) => {
     useFinanceStore.setState({ salary, budgets, toast: null });
     return <Story />;
@@ -113,8 +113,4 @@ export const ErrorAndWarning: Story = {
       percentageBudget('Savings', 50, 'Savings'),
     ]),
   ],
-};
-
-export const NoSalary: Story = {
-  decorators: [withPlan(null, [])],
 };

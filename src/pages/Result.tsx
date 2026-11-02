@@ -13,8 +13,6 @@ import {
 } from '@/domain/budgets/planChecks';
 import { useFinanceStore } from '@/store';
 
-const NO_SALARY_HINT = 'Enter your salary to see your result.';
-
 function ResultPage({ children }: { children: ReactNode }) {
   return (
     <Paper className="border-0! p-0! shadow-none! flex w-full flex-col gap-8 md:max-w-[1008px] lg:mb-auto lg:mt-12">
@@ -26,13 +24,7 @@ function ResultPage({ children }: { children: ReactNode }) {
   );
 }
 
-function ResultCta({
-  label,
-  to,
-}: {
-  label: string;
-  to: '/salary' | '/budgets';
-}) {
+function ResultCta({ label, to }: { label: string; to: '/budgets' }) {
   const navigate = useNavigate();
 
   return (
@@ -93,14 +85,7 @@ export function Result() {
   const salary = useFinanceStore((state) => state.salary);
 
   if (salary === null) {
-    return (
-      <ResultPage>
-        <Typography size="body" as="p" className="mb-0!">
-          {NO_SALARY_HINT}
-        </Typography>
-        <ResultCta label="Enter salary" to="/salary" />
-      </ResultPage>
-    );
+    return null;
   }
 
   return <ResultPlan salary={salary} />;

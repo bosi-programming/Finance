@@ -83,6 +83,17 @@ export function Salary() {
             <input {...inputProps} />
           </>
         )}
+        {hasSalary && !hasBudgets && (
+          <Button
+            color="secondary"
+            size="full-width"
+            onClick={() => {
+              void navigate({ to: '/budgets' });
+            }}
+          >
+            Add budgets
+          </Button>
+        )}
         {hasSalary && hasBudgets && (
           <Button
             color="secondary"
