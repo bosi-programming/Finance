@@ -52,4 +52,4 @@ GitHub Actions runs this test in `.github/workflows/e2e.yml`, workflow `E2E`.
 - Runs on Ubuntu with Node 22 and pnpm from `packageManager` in `package.json`.
 - Installs Chromium with the Playwright version the lockfile pins, then runs `pnpm test:e2e`.
 - On failure, uploads `test-results/` as artifact `playwright-test-results`, kept 7 days.
-- First green run: pending first push of the workflow.
+- First green run: [41487130102](https://github.com/bosi-programming/Finance/actions/runs/41487130102), commit `491122b`.
