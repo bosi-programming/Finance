@@ -37,8 +37,10 @@ async function expectResult(page: Page): Promise<void> {
     page.getByRole('heading', { level: 1, name: 'Result', exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole('region', { name: 'Salary', exact: true }),
-  ).toContainText('$5,000');
+    page
+      .getByRole('region', { name: 'Salary', exact: true })
+      .getByText('$5,000', { exact: true }),
+  ).toBeVisible();
   await expect(
     page
       .getByRole('region', { name: 'Housing', exact: true })
@@ -49,8 +51,9 @@ async function expectResult(page: Page): Promise<void> {
           name: 'Rent',
           exact: true,
         }),
-      }),
-  ).toContainText('$2,000');
+      })
+      .getByText('$2,000', { exact: true }),
+  ).toBeVisible();
   await expect(
     page
       .getByRole('region', { name: 'Hobbies', exact: true })
@@ -61,11 +64,14 @@ async function expectResult(page: Page): Promise<void> {
           name: 'Travel',
           exact: true,
         }),
-      }),
-  ).toContainText('$1,800');
+      })
+      .getByText('$1,800', { exact: true }),
+  ).toBeVisible();
   await expect(
-    page.getByRole('region', { name: 'Remaining', exact: true }),
-  ).toContainText('$1,200');
+    page
+      .getByRole('region', { name: 'Remaining', exact: true })
+      .getByText('$1,200', { exact: true }),
+  ).toBeVisible();
 }
 
 test('user flow from salary to JSON round trip', async ({
