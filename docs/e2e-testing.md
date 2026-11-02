@@ -46,6 +46,10 @@ pnpm test:e2e
 
 ## CI
 
-No CI runs this test yet. Passing runs so far are local only.
+GitHub Actions runs this test in `.github/workflows/e2e.yml`, workflow `E2E`.
 
-CI waits on moving the repo to GitHub and adding a GitHub Actions workflow: BOS-113.
+- Triggers: push to `main` and manual `workflow_dispatch`.
+- Runs on Ubuntu with Node 22 and pnpm from `packageManager` in `package.json`.
+- Installs Chromium with the Playwright version the lockfile pins, then runs `pnpm test:e2e`.
+- On failure, uploads `test-results/` as artifact `playwright-test-results`, kept 7 days.
+- First green run: pending first push of the workflow.
