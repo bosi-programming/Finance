@@ -20,7 +20,7 @@
     "prepare": "simple-git-hooks"
   },
   "simple-git-hooks": {
-    "pre-commit": "pnpm lint-staged && pnpm metrics:architecture"
+    "pre-commit": "pnpm lint-staged && pnpm test:run && pnpm metrics:architecture"
   },
   "keywords": [],
   "author": "",
