@@ -10,3 +10,4 @@
 | `../src/types/budget.ts` | TypeScript source of truth for all data schemas                   |
 | `design-system.md`       | Tokens, components, and usage patterns for the UI                 |
 | `e2e-testing.md`         | Playwright user flow, how to run it, and CI status                |
+| `ci.md`                  | GitHub Actions workflows and the pre-commit hook                  |
