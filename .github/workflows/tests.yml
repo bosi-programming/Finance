@@ -32,6 +32,9 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      - name: Check pre-commit hook runs tests
+        run: node -e "const h=require('./package.json')['simple-git-hooks']['pre-commit'];if(!h.includes('pnpm test:run')){console.error('pre-commit hook must run pnpm test:run');process.exit(1)}"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
