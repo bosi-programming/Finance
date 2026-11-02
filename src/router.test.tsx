@@ -173,6 +173,30 @@ describe('router', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('keeps history length on a Result link click with no salary', async () => {
+    const testRouter = await renderRoute('/salary');
+
+    await userEvent.click(screen.getByRole('link', { name: 'Result' }));
+
+    await waitFor(() => {
+      expect(testRouter.state.status).toBe('idle');
+    });
+    expect(testRouter.state.location.pathname).toBe('/salary');
+    expect(testRouter.history.length).toBe(1);
+  });
+
+  it('keeps a Result link click redirect to /budgets in history', async () => {
+    useFinanceStore.setState({ salary: 5000, budgets: [] });
+    const testRouter = await renderRoute('/salary');
+
+    await userEvent.click(screen.getByRole('link', { name: 'Result' }));
+
+    await waitFor(() => {
+      expect(testRouter.state.location.pathname).toBe('/budgets');
+    });
+    expect(testRouter.history.length).toBe(2);
+  });
+
   it('redirects /result to /budgets with a salary and no budgets', async () => {
     useFinanceStore.setState({ salary: 5000, budgets: [] });
     const testRouter = await renderRoute('/result');
