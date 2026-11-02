@@ -50,15 +50,17 @@ async function renderRoute(path: string) {
 describe('router', () => {
   beforeEach(resetPersistence);
 
-  it('renders the Home route with a heading and a Button', async () => {
-    await renderRoute('/');
+  it('redirects / to /salary', async () => {
+    const testRouter = await renderRoute('/');
 
+    expect(testRouter.state.location.pathname).toBe('/salary');
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Home' }),
+      screen.getByRole('heading', {
+        level: 1,
+        name: "What's your gross salary?",
+      }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Primary action' }),
-    ).toBeInTheDocument();
+    expect(testRouter.history.length).toBe(1);
   });
 
   it('renders the Salary route with an Input', async () => {

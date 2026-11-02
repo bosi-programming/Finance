@@ -104,17 +104,6 @@ describe('navigation', () => {
     );
   });
 
-  it('marks no item on the home route', async () => {
-    await renderRoute('/');
-
-    expect(screen.getByRole('navigation')).toBeVisible();
-    expect(
-      screen
-        .getAllByRole('link')
-        .filter((link) => link.hasAttribute('aria-current')),
-    ).toEqual([]);
-  });
-
   it('navigates when a link is clicked', async () => {
     useFinanceStore.setState({ salary: 5000, budgets: [rent] });
     const testRouter = await renderRoute('/salary');
