@@ -1,0 +1,75 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+      - deploy-tailscale
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      TAILSCALE_VERSION: 1.104.7
+      SKIP_INSTALL_SIMPLE_GIT_HOOKS: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm build
+      - name: Install rsync
+        run: sudo apt-get update && sudo apt-get install -y rsync
+      - name: Join Tailscale
+        env:
+          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
+        run: |
+          arch="$(dpkg --print-architecture)"
+          tarball="tailscale_${TAILSCALE_VERSION}_${arch}.tgz"
+          cd /tmp
+          curl -fsSLO "https://pkgs.tailscale.com/stable/${tarball}"
+          echo "$(curl -fsSL "https://pkgs.tailscale.com/stable/${tarball}.sha256")  ${tarball}" | sha256sum -c -
+          tar -xzf "${tarball}"
+          sudo install "tailscale_${TAILSCALE_VERSION}_${arch}/tailscale" "tailscale_${TAILSCALE_VERSION}_${arch}/tailscaled" /usr/local/bin/
+          sudo mkdir -p /var/run/tailscale
+          sudo sh -c 'nohup setsid tailscaled --tun=userspace-networking --state=mem: --socket=/var/run/tailscale/tailscaled.sock > /tmp/tailscaled.log 2>&1 &'
+          sudo tailscale up \
+            --authkey="${TS_OAUTH_SECRET}?ephemeral=true&preauthorized=true" \
+            --advertise-tags=tag:ci \
+            --hostname="ci-finance-${{ github.run_number }}" \
+            --timeout=60s
+      - name: Deploy via rsync
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "${DEPLOY_SSH_KEY}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "${DEPLOY_KNOWN_HOSTS}" > ~/.ssh/known_hosts
+          rsync -rlptz --delete --chmod=D755,F644 \
+            -e "ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o 'ProxyCommand=sudo tailscale nc %h %p'" \
+            dist/ "deploy@${DEPLOY_HOST}:"
+      - name: Leave Tailscale
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key
+          sudo tailscale logout || true
+          cat /tmp/tailscaled.log 2>/dev/null | tail -20 || true
