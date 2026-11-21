@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - deploy-tailscale
   workflow_dispatch:
 
 permissions:
